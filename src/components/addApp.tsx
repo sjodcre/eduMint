@@ -38,7 +38,7 @@ export default function AppCreateButton() {
     <div>
       {/* <h1>Welcome to EduMint</h1> */}
       {deferredPrompt && (
-        <Button onClick={handleInstallClick} variant="default">Install App</Button>
+        <Button onClick={handleInstallClick} variant="outline" className='rounded-full bg-white text-black'>Install App</Button>
       )}
     </div>
   );
