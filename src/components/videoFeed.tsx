@@ -288,7 +288,6 @@ function VideoCard({
   onBookmark: () => Promise<void>;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isLiked, setIsLiked] = useState(video.liked);
   const arProvider = useArweaveProvider();
   
 
