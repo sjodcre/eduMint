@@ -12,17 +12,17 @@ export default function Upload() {
     setCurrentScreen("videofeed")
   };
 
-  // const handleCancel = () => {
-  //   console.log('Upload canceled');
-  //   setShowVideoUploader(false);
-  // };
+  const handleCancel = () => {
+    console.log('Upload canceled');
+    setShowVideoUploader(false);
+  };
 
 
   return (
     <div>
    {showVideoUploader && (
             <div className="mt-4 w-full">
-              <VideoUploader onUpload={handleUpload} />
+              <VideoUploader onUpload={handleUpload} onCancel={handleCancel} />
             </div>
           )}
   </div>

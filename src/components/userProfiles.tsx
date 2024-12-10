@@ -26,10 +26,10 @@ export const UserProfile = ({ user , onClose }: {
   };
 
   // Define handleCancel function
-  // const handleCancel = () => {
-  //   console.log('Upload canceled');
-  //   setShowVideoUploader(false);
-  // };
+  const handleCancel = () => {
+    console.log('Upload canceled');
+    setShowVideoUploader(false);
+  };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
@@ -75,7 +75,7 @@ export const UserProfile = ({ user , onClose }: {
           <CreatePostDrawer/>
           {showVideoUploader && (
             <div className="mt-4 w-full">
-              <VideoUploader onUpload={handleUpload} />
+              <VideoUploader onUpload={handleUpload} onCancel={handleCancel}/>
             </div>
           )}
         </div>
