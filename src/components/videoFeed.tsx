@@ -13,7 +13,7 @@ export default function VideoFeed() {
   const { videos, loading, refetch: fetchVideos, error } = useVideos();
   const [localVideos, setLocalVideos] = useState(videos);
   // const {videos, loading, error, fetchPlayerProfile} = useStore()
-  // ts-ignore
+  // @ts-ignore
   const [videoStatus, setVideoStatus] = useState<boolean>(false);
 
   // @ts-ignore
