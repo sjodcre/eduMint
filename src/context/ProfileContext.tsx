@@ -99,10 +99,7 @@ export function useArweaveProvider(): ArweaveContextState {
 }
 
 export function ArweaveProvider(props: ArweaveProviderProps) {
-  // const language = {
-  // 	connectWallet: "Connect Wallet",
-  // 	// Add other English language strings as needed
-  // };
+
   const { connected } = useConnection();
 
   const wallets = AR_WALLETS;

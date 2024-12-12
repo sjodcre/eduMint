@@ -84,7 +84,12 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
   
   const createPosts = async (videoTxId: string, title: string, description: string) => {
 
-    if (!arProvider.profile) return;
+    console.log("arProvider.profile", arProvider.profile);
+
+    if (!arProvider.profile) {
+      console.log("No profile found, cannot upload");
+      return;
+    }
 
     // if (!manifestTxid) {
     //   toast({
@@ -146,6 +151,7 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
     
     console.log("activeAddress", activeAddress);
     if (!activeAddress) {
+      setUploading(false)
       await connectWallet();
     }
 
@@ -337,68 +343,70 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
 
   return (
     <div className="w-full max-w-md mx-auto bg-zinc-800 p-6 rounded-lg shadow-lg">
-      <div
-        {...getRootProps()}
-        className={`border-2 border-dashed border-zinc-600 rounded-lg p-8 text-center cursor-pointer transition-colors ${
-          isDragActive ? 'border-zinc-400 bg-zinc-700' : 'hover:border-zinc-500 hover:bg-zinc-700/50'
-        }`}
-      >
-        <input {...getInputProps()} />
-        <Upload className="mx-auto h-12 w-12 text-zinc-400" />
-        <p className="mt-2 text-sm text-zinc-400">Drag & drop a video here, or click to select a file</p>
-      </div>
-      {video && (
-        <div className="mt-4">
-          <video
-            src={video.preview}
-            controls
-            className="w-full rounded-lg max-h-[40vh] object-contain"
-          />
-          <div className="flex flex-col gap-4 mt-4">
-        <input
-          type="text"
-          placeholder="Enter video title"
-          value={postTitle}
-          onChange={(e) => setPostTitle(e.target.value)}
-          className="p-2 border rounded text-black"
-        />
-        <textarea
-          placeholder="Enter video description"
-          value={postDescription}
-          onChange={(e) => setPostDescription(e.target.value)}
-          className="p-2 border rounded text-black"
-          rows={4}
-        />
-      </div>
-          <p className="mt-2 text-sm text-zinc-400">
-            File: {video.file.name} ({(video.size / (1024 * 1024)).toFixed(2)} MB)
-          </p>
-        </div>
-      )}
-      <div className="flex items-center mt-4">
-        <input type="checkbox" id="license" defaultChecked className="mr-2" />
-        <label htmlFor="license" className="text-xs text-zinc-400">This asset will contain a license</label>
-      </div>
-      {hasLargeVideo && (
-        <p className="text-red-500 mt-2 text-sm">Cannot upload videos larger than 5MB</p>
-      )}
-      {uploading && (
-        <div className="mt-4">
-          <Progress value={uploadProgress} className="w-full" />
-          <p className="text-sm text-zinc-400 mt-2">Uploading... {uploadProgress}%</p>
-        </div>
-      )}
-      <div className="flex justify-between mt-6">
-        <Button
-          onClick={uploadToArweave}
-          disabled={hasLargeVideo || !video || uploading ||!postTitle || !postDescription }
-          className="bg-blue-500 hover:bg-blue-600 text-white"
+      <div className="min-h-screen pb-24"> {/* Add min-height and bottom padding to ensure content is always scrollable */}
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed border-zinc-600 rounded-lg p-8 text-center cursor-pointer transition-colors ${
+            isDragActive ? 'border-zinc-400 bg-zinc-700' : 'hover:border-zinc-500 hover:bg-zinc-700/50'
+          }`}
         >
-          {uploading ? 'Uploading...' : 'Upload'}
-        </Button>
-        {/* <Button variant="outline" onClick={onCancel} disabled={uploading}>
-          Cancel
-        </Button> */}
+          <input {...getInputProps()} />
+          <Upload className="mx-auto h-12 w-12 text-zinc-400" />
+          <p className="mt-2 text-sm text-zinc-400">Drag & drop a video here, or click to select a file</p>
+        </div>
+        {video && (
+          <div className="mt-4">
+            <video
+              src={video.preview}
+              controls
+              className="w-full rounded-lg max-h-[60vh] object-contain"
+            />
+            <div className="flex flex-col gap-4 mt-4">
+              <input
+                type="text"
+                placeholder="Enter video title"
+                value={postTitle}
+                onChange={(e) => setPostTitle(e.target.value)}
+                className="p-2 border rounded text-black"
+              />
+              <textarea
+                placeholder="Enter video description"
+                value={postDescription}
+                onChange={(e) => setPostDescription(e.target.value)}
+                className="p-2 border rounded text-black"
+                rows={4}
+              />
+            </div>
+            <p className="mt-2 text-sm text-zinc-400">
+              File: {video.file.name} ({(video.size / (1024 * 1024)).toFixed(2)} MB)
+            </p>
+          </div>
+        )}
+        <div className="flex items-center mt-4">
+          <input type="checkbox" id="license" defaultChecked className="mr-2" />
+          <label htmlFor="license" className="text-xs text-zinc-400">This asset will contain a license</label>
+        </div>
+        {hasLargeVideo && (
+          <p className="text-red-500 mt-2 text-sm">Cannot upload videos larger than 5MB</p>
+        )}
+        {uploading && (
+          <div className="mt-4">
+            <Progress value={uploadProgress} className="w-full" />
+            <p className="text-sm text-zinc-400 mt-2">Uploading... {uploadProgress}%</p>
+          </div>
+        )}
+        <div className="flex justify-between mt-6">
+          <Button
+            onClick={uploadToArweave}
+            disabled={hasLargeVideo || !video || uploading ||!postTitle || !postDescription }
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            {uploading ? 'Uploading...' : 'Upload'}
+          </Button>
+          {/* <Button variant="outline" onClick={onCancel} disabled={uploading}>
+            Cancel
+          </Button> */}
+        </div>
       </div>
     </div>
   );

@@ -7,21 +7,47 @@ import { ScreenContext } from "@/context/ScreenContext";
 import { createDataItemSigner, message, result } from "@permaweb/aoconnect";
 import { processId } from "@/config/config";
 import { transferAR } from "@/lib/TransferAR";
+import { useConnection } from "@arweave-wallet-kit/react";
 
 export default function VideoFeed() {
   const { videos, loading, refetch: fetchVideos, error } = useVideos();
   const [localVideos, setLocalVideos] = useState(videos);
   // const {videos, loading, error, fetchPlayerProfile} = useStore()
+  const [videoStatus, setVideoStatus] = useState<boolean>(false);
 
   // @ts-ignore
   const {setSelectedUser} = useArweaveProvider()
   const {setCurrentScreen} = useContext(ScreenContext)
+  const { connected, connect } = useConnection();
+
+  const checkWalletConnection = async () => {
+    if (!connected) {
+      // Show popup/modal to connect wallet
+      const shouldConnect = window.confirm("Please connect your Arweave wallet to continue. Would you like to connect now?");
+      if (shouldConnect) {
+        try {
+          await connect();
+          return true;
+        } catch (error) {
+          console.error("Failed to connect wallet:", error);
+          return false;
+        }
+      }
+      return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
     const loadVideos = async () => {
       if (videos.length === 0) {
-        await fetchVideos();
-        setLocalVideos(videos);
+        const result = await fetchVideos();
+        if (result === null) {
+          setVideoStatus(false);
+        } else {
+          setVideoStatus(true);
+          setLocalVideos(videos);
+        }
       }
     };
     loadVideos();
@@ -29,12 +55,11 @@ export default function VideoFeed() {
 
   useEffect(() => {
     // fetchVideos();
-    console.log("Setting local videos", videos);
+    console.log("Setting local videos when videos changes", videos);
     setLocalVideos(videos);
   }, [videos]);
 
   useEffect(() => {
-    // Listen for screen changes to "videofeed"
     const handleScreenChange = async () => {
       if (window.location.hash === '#videofeed') {
         console.log("Home button pressed - refreshing videos");
@@ -65,6 +90,8 @@ export default function VideoFeed() {
   };
 
    const handleBookmarkVideo = async (video: Video) => {
+    if (!await checkWalletConnection()) return;
+    
     const updatedVideo = { ...video }; // Create a copy of the post to update
     if (!video.bookmarked) {
       try {
@@ -162,6 +189,8 @@ export default function VideoFeed() {
   // };
 
   const handleLike = async (video: Video) => {
+    if (!await checkWalletConnection()) return;
+    
     const updatedVideo = { ...video }; // Create a copy of the post to update
 
     if (video.liked) {
@@ -289,7 +318,7 @@ function VideoCard({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const arProvider = useArweaveProvider();
-  
+  const { connected, connect } = useConnection();
 
   useEffect(() => {
     const options = {
@@ -325,6 +354,20 @@ function VideoCard({
   // };
 
   const handleSendTip = async () => {
+    if (!connected) {
+      const shouldConnect = window.confirm("Please connect your Arweave wallet to send a tip. Would you like to connect now?");
+      if (shouldConnect) {
+        try {
+          await connect();
+        } catch (error) {
+          console.error("Failed to connect wallet:", error);
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
     console.log("arProvider.profile", arProvider.profile);
     if (!arProvider.profile) return;
     try {

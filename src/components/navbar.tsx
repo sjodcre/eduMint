@@ -76,7 +76,7 @@ export function BottomNav() {
         size="icon"
         onClick={() => {
           setCurrentScreen("profile");
-          console.log("button pressed");
+          console.log("profile button pressed");
         }}
       >
         <User className="text-white" size={24} />

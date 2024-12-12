@@ -42,63 +42,112 @@ export function useVideos() {
     try {
       setLoading(true);
       setError(null);
-      console.log("arProvider.profile", arProvider.profile);
-      const msgRes = await message({
-        process: processId,
-        tags: [
-          { name: "Action", value: "List-Posts-Likes" },
-          { name: "Author-Id", value: arProvider.profile?.walletAddress || "" },
-        ],
-        signer: createDataItemSigner(window.arweaveWallet),
-      });
+      // console.log("fetching videos with profile: ", arProvider.profile);
+      if (arProvider.profile) {
+        const msgRes = await message({
+          process: processId,
+          tags: [
+            { name: "Action", value: "List-Posts-Likes" },
+            { name: "Author-Id", value: arProvider.profile.walletAddress },
+          ],
+          signer: createDataItemSigner(window.arweaveWallet),
+        });
 
-      const postResult = await result({
-        process: processId,
-        message: msgRes,
-      });
+        const postResult = await result({
+          process: processId,
+          message: msgRes,
+        });
 
-      const parsedPosts = postResult.Messages.map((msg: any) => {
-        const parsedData = JSON.parse(msg.Data);
-        return parsedData.map((post: any) => ({
-          ...post,
-          Liked: post.Liked === 1,
-          LikeCount: post.LikeCount || 0,
-          SellingStatus: post.SellingStatus === 1,
-          Bookmarked: post.Bookmarked === 1,
+        const parsedPosts = postResult.Messages.map((msg: any) => {
+          const parsedData = JSON.parse(msg.Data);
+          return parsedData.map((post: any) => ({
+            ...post,
+            Liked: post.Liked === 1,
+            LikeCount: post.LikeCount || 0,
+            SellingStatus: post.SellingStatus === 1,
+            Bookmarked: post.Bookmarked === 1,
+          }));
+        });
+
+        const videos = parsedPosts.flat().map((post: any) => ({
+          id: post.ID,
+          autoId: post.AutoID,
+          videoUrl: `https://arweave.net/${post.VideoTxId}`,
+          title: post.Title,
+          user: {
+            id: post.AuthorWallet,
+            username: post.Author,
+            profileImage: '/logo-black-icon.svg',
+            tier: "bronze",
+            followers: 0,
+            following: 0,
+            displayName: post.Author
+          },
+          likes: post.LikeCount,
+          likeSummary: {
+            PostID: post.AutoID,
+            LikeCount: post.LikeCount
+          },
+          comments: 0,
+          description: post.Body,
+          price: post.Price,
+          sellingStatus: post.SellingStatus,
+          liked: post.Liked,
+          bookmarked: post.Bookmarked
         }));
-      });
+        console.log("videos: ", videos);
 
-      console.log("parsedPosts", parsedPosts);
+        setVideos(videos);
+        return videos;
 
-      const videos = parsedPosts.flat().map((post: any) => ({
-        id: post.ID,
-        autoId: post.AutoID,
-        videoUrl: `https://arweave.net/${post.VideoTxId}`,
-        title: post.Title,
-        user: {
-          id: post.AuthorWallet,
-          username: post.Author,
-          profileImage: '/logo-black-icon.svg',
-          tier: "bronze",
-          followers: 0,
-          following: 0,
-          displayName: post.Author
-        },
-        likes: post.LikeCount,
-        likeSummary: {
-          PostID: post.AutoID,
-          LikeCount: post.LikeCount
-        },
-        comments: 0,
-        description: post.Body,
-        price: post.Price,
-        sellingStatus: post.SellingStatus,
-        liked: post.Liked,
-        bookmarked: post.Bookmarked
-      }));
+      } else {
+        console.log("fetching videos without profile");
+        const response = await dryrun({
+          process: processId,
+          tags: [{ name: "Action", value: "List-Posts" }],
+        });
 
-      setVideos(videos);
-      return videos;
+        const parsedPosts = response.Messages.map((msg: any) => {
+          const parsedData = JSON.parse(msg.Data);
+          return parsedData.map((post: any) => ({
+            ...post,
+            LikeCount: post.LikeCount || 0,
+            Liked: false,
+            SellingStatus: post.SellingStatus === 1,
+            Bookmarked: false
+          }));
+        });
+
+        const videos = parsedPosts.flat().map((post: any) => ({
+          id: post.ID,
+          autoId: post.AutoID,
+          videoUrl: `https://arweave.net/${post.VideoTxId}`,
+          title: post.Title,
+          user: {
+            id: post.AuthorWallet,
+            username: post.Author,
+            profileImage: '/logo-black-icon.svg',
+            tier: "bronze",
+            followers: 0,
+            following: 0,
+            displayName: post.Author
+          },
+          likes: post.LikeCount,
+          likeSummary: {
+            PostID: post.AutoID,
+            LikeCount: post.LikeCount
+          },
+          comments: 0,
+          description: post.Body,
+          price: post.Price,
+          sellingStatus: post.SellingStatus,
+          liked: false,
+          bookmarked: false
+        }));
+
+        setVideos(videos);
+        return videos;
+      }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to fetch videos";
@@ -112,6 +161,11 @@ export function useVideos() {
   const fetchPlayerProfile = async () => {
     if (!activeAddress) {
       console.error("No active address");
+      return null;
+    }
+
+    if (!arProvider.profile) {
+      console.log("No profile found, create a profile first");
       return null;
     }
 
@@ -159,9 +213,9 @@ export function useVideos() {
 
       const userDetails = {
         id: activeAddress,
-        name: profileRes.Profile.DisplayName || "ANON",
-        score: 0,
-        bazarId: profileIdRes[0].ProfileId,
+        // name: profileRes.Profile.DisplayName || "ANON",
+        // score: 0,
+        // bazarId: profileIdRes[0].ProfileId,
         walletAddress: profileRes.Owner || "no owner",
         displayName: profileRes.Profile.DisplayName || "ANON",
         username: profileRes.Profile.UserName || "unknown",

@@ -17,7 +17,7 @@ export default function App() {
       {currentScreen === "videofeed" && <VideoFeed />}
       {currentScreen === "upload" && <Upload />}
       {currentScreen === "market" && <Market />}
-      {currentScreen === "profile" && selectedUser && <ProfilePage user={selectedUser}/>}
+      {currentScreen === "profile" && <ProfilePage user={selectedUser || null}/>}
       <BottomNav/>
     </div>
   );

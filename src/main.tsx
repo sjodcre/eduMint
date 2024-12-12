@@ -28,7 +28,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             strategies: [new ArConnect(),new ArweaveWebWalletStrategy(), new othent()],
           }}
           theme={{
-            displayTheme: "light",
+            displayTheme: "dark",
           }}
         >
           <ArweaveProvider>
