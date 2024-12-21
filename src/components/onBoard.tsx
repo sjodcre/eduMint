@@ -7,7 +7,7 @@ import {Link} from 'react-router-dom'
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
+      <header className="px-4 lg:px-6 h-14 bg-black text-white flex items-center">
         <Link className="flex items-center justify-center" to="/">
           <span className="sr-only">Video Platform</span>
          <img
@@ -33,7 +33,7 @@ export default function LandingPage() {
         </nav>
       </header>
    <main className="flex-1 flex flex-col justify-center">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex items-center justify-center">
+        <section className="w-full py-12 bg-black text-white md:py-24 lg:py-32 xl:py-48 flex items-center justify-center">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
@@ -44,7 +44,7 @@ export default function LandingPage() {
                   Discover, create, and share short videos with the world. Join our community of creators today!
                 </p>
               </div>
-              <div className="space-x-4">
+              <div className="space-x-4 ">
                 <AppCreateButton/>
               </div>
             </div>

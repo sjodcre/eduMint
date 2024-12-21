@@ -46,7 +46,8 @@ export function cleanProcessField(value: string) {
 
 interface UploadVideosProps {
   onUpload: (videoTxId: string | null, title: string, description: string) => void;
-  // onCancel: () => void;
+  onCancel: () => void;
+  
 }
 
 

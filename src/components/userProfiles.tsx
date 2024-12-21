@@ -21,6 +21,7 @@ export const UserProfile = ({ user , onClose }: {
   const [showVideoUploader, setShowVideoUploader] = useState(false);
     // @ts-ignore
   const handleUpload = (manifestTxid: string | null, title: string, description: string) => {
+
     // console.log('Upload completed with manifestTxid:', manifestTxid);
     // Handle post-upload actions here
     setShowVideoUploader(false);
@@ -78,7 +79,7 @@ export const UserProfile = ({ user , onClose }: {
           <CreatePostDrawer/>
           {showVideoUploader && (
             <div className="mt-4 w-full">
-              <VideoUploader onUpload={handleUpload} />
+              <VideoUploader onUpload={handleUpload} onCancel={handleCancel}/>
             </div>
           )}
         </div>

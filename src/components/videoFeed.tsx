@@ -17,8 +17,8 @@ export default function VideoFeed() {
   const [videoStatus, setVideoStatus] = useState<boolean>(false);
 
   // @ts-ignore
-  const {setSelectedUser} = useArweaveProvider()
-  const {setCurrentScreen} = useContext(ScreenContext)
+  const { setSelectedUser } = useArweaveProvider()
+  const { setCurrentScreen } = useContext(ScreenContext)
   const { connected, connect } = useConnection();
 
   const checkWalletConnection = async () => {
@@ -90,9 +90,9 @@ export default function VideoFeed() {
     }
   };
 
-   const handleBookmarkVideo = async (video: Video) => {
+  const handleBookmarkVideo = async (video: Video) => {
     if (!await checkWalletConnection()) return;
-    
+
     const updatedVideo = { ...video }; // Create a copy of the post to update
     if (!video.bookmarked) {
       try {
@@ -121,14 +121,14 @@ export default function VideoFeed() {
           console.log("Post saved to bookmarks successfully!");
           updatedVideo.bookmarked = true; // Update the local state
         }
-          
+
       } catch (error) {
-          console.log(error);
-          // toast({
-          //     description: "Error saving post"
-          // });
-          console.log("Error saving post");
-          throw error;
+        console.log(error);
+        // toast({
+        //     description: "Error saving post"
+        // });
+        console.log("Error saving post");
+        throw error;
       }
     } else {
       // Handle removing bookmark case
@@ -158,21 +158,21 @@ export default function VideoFeed() {
           console.log("Post removed from bookmarks successfully!");
           updatedVideo.bookmarked = false; // Update the local state
         }
-          
+
       } catch (error) {
-          console.log(error);
-          // toast({
-          //     description: "Error saving post"
-          // });
-          console.log("Error saving post");
-          throw error;
+        console.log(error);
+        // toast({
+        //     description: "Error saving post"
+        // });
+        console.log("Error saving post");
+        throw error;
       }
     }
 
-      setLocalVideos((prevVideos) =>
-        prevVideos.map((p) => (p.id === updatedVideo.id ? updatedVideo : p))
-      );
-    
+    setLocalVideos((prevVideos) =>
+      prevVideos.map((p) => (p.id === updatedVideo.id ? updatedVideo : p))
+    );
+
     // setPosts((prevPosts) =>
     //   prevPosts.map((p) => (p.ID === updatedPost.ID ? updatedPost : p))
     // );
@@ -191,7 +191,7 @@ export default function VideoFeed() {
 
   const handleLike = async (video: Video) => {
     if (!await checkWalletConnection()) return;
-    
+
     const updatedVideo = { ...video }; // Create a copy of the post to update
 
     if (video.liked) {
@@ -220,7 +220,7 @@ export default function VideoFeed() {
         // });
         console.log("Unliking a video", video.id);
         updatedVideo.liked = false; // Update the local state
-        updatedVideo.likes = Math.max(0, updatedVideo.likes - 1); 
+        updatedVideo.likes = Math.max(0, updatedVideo.likes - 1);
       }
     } else {
       const res = await message({
@@ -251,10 +251,10 @@ export default function VideoFeed() {
         updatedVideo.likes += 1; // Increase like count
       }
     }
-      setLocalVideos((prevVideos) =>
-        prevVideos.map((p) => (p.id === updatedVideo.id ? updatedVideo : p))
-      );
-    
+    setLocalVideos((prevVideos) =>
+      prevVideos.map((p) => (p.id === updatedVideo.id ? updatedVideo : p))
+    );
+
   };
 
   const onProfileClick = (user: User) => {
@@ -388,71 +388,71 @@ function VideoCard({
   };
 
   return (
-     <div className="relative h-screen w-full bg-black snap-start flex items-center justify-center">
-        <video
-          ref={videoRef}
-          className="h-full w-full object-contain md:max-w-[400px] md:max-h-[calc(100vh-80px)]"
-          loop
-          muted
-          playsInline
-        >
-          <source src={video.videoUrl} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+    <div className="relative h-screen w-full bg-black snap-start flex items-center justify-center">
+      <video
+        ref={videoRef}
+        className="h-full w-full object-contain md:max-w-[400px] md:max-h-[calc(100vh-80px)]"
+        loop
+        muted
+        playsInline
+      >
+        <source src={video.videoUrl} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
 
-        <div className="absolute bottom-32 left-4 right-4">
-          <h2 className="text-white text-lg font-bold mb-1">{video.title}</h2>
-          <p className="text-white text-sm mb-2">{video.description.split(' ').slice(0,20).join(' ') + (video.description.split(' ').length > 20 ? '...' : '')}</p>
-        </div>
-
-        <div className="absolute bottom-20 left-4 flex items-center">
-          <button
-            onClick={() => onProfileClick(video.user)}
-            className="flex items-center"
-          >
-            <div className="relative">
-              <img
-                src={video.user.profileImage || "/ripple.png"}
-                alt={`${video.user.username}'s profile`}
-                className="h-12 w-12 rounded-full border-2 border-white"
-              />
-              <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-purple-500 text-xs font-bold text-white">
-                {video.user.tier}
-              </div>
-            </div>
-            <span className="ml-2 text-lg font-semibold text-white">
-              @{video.user.username}
-            </span>
-          </button>
-        </div>
-
-        <div className="absolute bottom-20 right-4 flex flex-col items-center space-y-4">
-          <button></button>
-          <button className="flex flex-col items-center" title="Like" onClick={onLike}>
-            <Heart
-              className={`h-8 w-8 ${video.liked ? "fill-red-500 text-red-500" : "text-white"}`}
-            />
-            <span className="text-sm text-white">
-              {video.likes}
-            </span>
-          </button>
-          {/* <button className="flex flex-col items-center"> */}
-          {/*   <MessageCircle className="h-8 w-8 text-white" /> */}
-          {/*   <span className="text-sm text-white">{video.comments}</span> */}
-          {/* </button> */}
-          <button className="flex flex-col items-center text-green-500" title="Tip" onClick={handleSendTip}>
-            <BadgeDollarSign className="h-8 w-8 " />
-            <span className="text-sm" >Tip</span>
-          </button>
-          <button 
-            className={`flex flex-col items-center ${video.bookmarked ? 'text-blue-500' : 'text-white'}`} 
-            title="Bookmark" 
-            onClick={onBookmark}
-          >
-            <Bookmark className="h-8 w-8" fill={video.bookmarked ? 'blue' : ''} />
-            <span className="text-sm">Bookmark</span>
-          </button>
-        </div>
+      <div className="absolute bottom-32 left-4 right-4">
+        <h2 className="text-white text-lg font-bold mb-1">{video.title}</h2>
+        <p className="text-white text-sm mb-2">{video.description.split(' ').slice(0, 20).join(' ') + (video.description.split(' ').length > 20 ? '...' : '')}</p>
       </div>
+
+      <div className="absolute bottom-20 left-4 flex items-center">
+        <button
+          onClick={() => onProfileClick(video.user)}
+          className="flex items-center"
+        >
+          <div className="relative">
+            <img
+              src={video.user.profileImage || "/ripple.png"}
+              alt={`${video.user.username}'s profile`}
+              className="h-12 w-12 rounded-full border-2 border-white"
+            />
+            <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-purple-500 text-xs font-bold text-white">
+              {video.user.tier}
+            </div>
+          </div>
+          <span className="ml-2 text-lg font-semibold text-white">
+            @{video.user.username}
+          </span>
+        </button>
+      </div>
+
+      <div className="absolute bottom-20 right-4 flex flex-col items-center space-y-4">
+        <button></button>
+        <button className="flex flex-col items-center" title="Like" onClick={onLike}>
+          <Heart
+            className={`h-8 w-8 ${video.liked ? "fill-red-500 text-red-500" : "text-white"}`}
+          />
+          <span className="text-sm text-white">
+            {video.likes}
+          </span>
+        </button>
+        {/* <button className="flex flex-col items-center"> */}
+        {/*   <MessageCircle className="h-8 w-8 text-white" /> */}
+        {/*   <span className="text-sm text-white">{video.comments}</span> */}
+        {/* </button> */}
+        <button className="flex flex-col items-center text-green-500" title="Tip" onClick={handleSendTip}>
+          <BadgeDollarSign className="h-8 w-8 " />
+          <span className="text-sm" >Tip</span>
+        </button>
+        <button
+          className={`flex flex-col items-center ${video.bookmarked ? 'text-blue-500' : 'text-white'}`}
+          title="Bookmark"
+          onClick={onBookmark}
+        >
+          <Bookmark className="h-8 w-8" fill={video.bookmarked ? 'blue' : ''} />
+          <span className="text-sm">Bookmark</span>
+        </button>
+      </div>
+    </div>
   );
 }
