@@ -41,24 +41,25 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
 	};
 
 	try {
+		console.log("fetching profile for: ", args.address);
 		const profileLookup = await readHandler({
 			processId: processIdRegistry, 
 			action: 'Get-Profiles-By-Delegate',
 			data: { Address: args.address },
 		});
-
+		console.log("profileLookup: ", profileLookup);
 		let activeProfileId: string = "";
 		if (profileLookup && profileLookup.length > 0 && profileLookup[0].ProfileId) {
 			activeProfileId = profileLookup[0].ProfileId;
 		}
-
+		console.log("activeProfileId: ", activeProfileId);
 		if (activeProfileId) {
 			const fetchedProfile = await readHandler({
 				processId: activeProfileId,
 				action: 'Info',
 				data: null,
 			});
-
+			console.log("fetchedProfile: ", fetchedProfile);
 			if (fetchedProfile) {
 				return {
 					id: activeProfileId,

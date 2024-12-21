@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useActiveAddress, useConnection } from '@arweave-wallet-kit/react';
+import { useConnection } from '@arweave-wallet-kit/react';
 import { Buffer } from 'buffer';
 import { Button } from './ui/button';
 import { toast } from '../components/useToast';
 import { TagType } from '@/lib/ProfileUtils';
-import { useArweaveProvider } from '@/context/ProfileContext';
+// import { useArweaveProvider } from '@/context/ProfileContext';
 import { connect as aoConnect, createDataItemSigner, message, result } from '@permaweb/aoconnect';
 import { GATEWAYS, getGQLData } from '@/lib/utils';
 import { Upload } from 'lucide-react';
@@ -56,11 +56,11 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
   const { connect: connectWallet } = useConnection();
   const [postDescription, setPostDescription] = useState("");
   const [postTitle, setPostTitle] = useState("");
-  const activeAddress = useActiveAddress();
-  const arProvider = useArweaveProvider();
+  // const activeAddress = useActiveAddress();
+  // const arProvider = useArweaveProvider();
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
-
+  const { connected } = useConnection();
   const hasLargeVideo = video?.size && video.size > 5 * 1024 * 1024; // 5MB in bytes
 
   const onDrop = useCallback( (acceptedFiles: File[]) => {
@@ -84,12 +84,12 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
   
   const createPosts = async (videoTxId: string, title: string, description: string) => {
 
-    console.log("arProvider.profile", arProvider.profile);
+    // console.log("arProvider.profile", arProvider.profile);
 
-    if (!arProvider.profile) {
-      console.log("No profile found, cannot upload");
-      return;
-    }
+    // if (!arProvider.profile) {
+    //   console.log("No profile found, cannot upload");
+    //   return;
+    // }
 
     // if (!manifestTxid) {
     //   toast({
@@ -109,7 +109,8 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
           { name: "Action", value: "Create-Post" },
           { name: "VideoTxId", value: videoTxId },
           { name: "Title", value: title || "Untitled" },
-          { name: "Name", value: arProvider.profile.username || "ANON" },
+          // { name: "Name", value: arProvider.profile.username || "ANON" },
+          { name: "Name", value: "ANON" },
           // { name: "MediaType", value: mediaType.toString() || "video"}, // Add this tag
         ],
         data: description || "No description",
@@ -138,28 +139,29 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
   };
 
   const uploadToArweave = async () => {
+    console.log("connected or not: ", connected);
+
     setUploading(true)
-    setUploadProgress(0)
+    setUploadProgress(1)
     const aos = aoConnect();
 
     if (!video) {
       toast({
         description: "No video to upload!"
       });
+      setUploading(false)
+      setUploadProgress(0)
       return;
     }
-    
-    console.log("activeAddress", activeAddress);
-    if (!activeAddress) {
-      setUploading(false)
+    // console.log("activeAddress", activeAddress);
+    if (!connected) {
+      setUploading(false);
+      setUploadProgress(0)
       await connectWallet();
     }
+    setUploadProgress(10)
 
-    // const arweave = Arweave.init({
-    //   host: 'arweave.net',
-    //   port: 443,
-    //   protocol: 'https',
-    // });
+    // const userAddress = await window.arweaveWallet.getActiveAddress()
 
     const videoTxIds: { txid: string; path: string; type: string }[] = [];
 
@@ -178,7 +180,8 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
             try {
                 const assetTags: TagType[] = [
                     { name: 'Content-Type', value: contentType },
-                    { name: 'Creator', value: arProvider?.profile?.id || "ANON" },
+                    // { name: 'Creator', value: arProvider?.profile?.id || "ANON" },
+                    { name: 'Creator', value: "ANON" },
                     // { name: 'Title', value: title },
                     // { name: 'Description', value: description }, 
                     { name: 'Title', value: postTitle },
@@ -207,7 +210,7 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
                 } catch (e: any) {
                     console.error(e);
                 }
-
+                setUploadProgress(15)
                 // if (processSrc) {
                 //     processSrc = processSrc.replaceAll('<CREATOR>', arProvider?.profile?.id || "ANON");
                 //     processSrc = processSrc.replaceAll(`'<NAME>'`, cleanProcessField(title));
@@ -217,7 +220,8 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
                 //     processSrc = processSrc.replaceAll('<COLLECTION>', "");
                 // }
                 if (processSrc) {
-                  processSrc = processSrc.replace(/<CREATOR>/g, arProvider?.profile?.id || "ANON");
+                  // processSrc = processSrc.replace(/<CREATOR>/g, arProvider?.profile?.id || "ANON");
+                  processSrc = processSrc.replace(/<CREATOR>/g, "ANON");
                   processSrc = processSrc.replace(/'<NAME>'/g, cleanProcessField(postTitle));
                   processSrc = processSrc.replace(/<TICKER>/g, 'ATOMIC');
                   processSrc = processSrc.replace(/<DENOMINATION>/g, '1');
@@ -228,6 +232,7 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
                 let processId: string | undefined = undefined;
                 let retryCount = 0;
                 const maxSpawnRetries = 25;
+                setUploadProgress(20)
 
                 while (processId === undefined && retryCount < maxSpawnRetries) {
                     try {
@@ -254,7 +259,7 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
                 if (!processId) {
                     throw new Error("Failed to get valid process ID");
                 }
-
+                setUploadProgress(40)
                 let fetchedAssetId: string | undefined = undefined;
                 retryCount = 0;
                 const maxFetchRetries = 100;
@@ -302,7 +307,8 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
                             signer: createDataItemSigner(window.arweaveWallet),
                             tags: [
                                 { name: 'Action', value: 'Add-Asset-To-Profile' },
-                                { name: 'ProfileProcess', value: arProvider?.profile?.id || "ANON" },
+                                // { name: 'ProfileProcess', value: arProvider?.profile?.id || "ANON" },
+                                { name: 'ProfileProcess', value: "ANON" },
                                 { name: 'Quantity', value: balance.toString() },
                             ],
                             data: JSON.stringify({ Id: processId, Quantity: balance }),

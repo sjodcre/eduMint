@@ -6,7 +6,7 @@ import VideoUploader from './videoUploader.tsx'; // Assuming VideoUploader compo
 // interface UserProfileProps {
 //   user: {
 //     username: string
-//     profileImage: string
+//     profileImage: stringfhandl
 //     tier: string
 //     followers: number
 //     following: number
@@ -19,17 +19,21 @@ export const UserProfile = ({ user , onClose }: {
   onClose: () => void;
 }) => {
   const [showVideoUploader, setShowVideoUploader] = useState(false);
-  const handleUpload = () => {
+    // @ts-ignore
+  const handleUpload = (manifestTxid: string | null, title: string, description: string) => {
+
     // console.log('Upload completed with manifestTxid:', manifestTxid);
     // Handle post-upload actions here
     setShowVideoUploader(false);
   };
 
   // Define handleCancel function
-  const handleCancel = () => {
-    console.log('Upload canceled');
-    setShowVideoUploader(false);
-  };
+  // const handleCancel = () => {
+  //   console.log('Upload canceled');
+  //   setShowVideoUploader(false);
+  // };
+
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">

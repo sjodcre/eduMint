@@ -8,7 +8,7 @@ import {
   result,
 } from "@permaweb/aoconnect";
 import { processId } from "@/config/config";
-import { useActiveAddress } from "@arweave-wallet-kit/react";
+import { useConnection } from "@arweave-wallet-kit/react";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
@@ -16,10 +16,10 @@ const RETRY_DELAY = 1000;
 export function useVideos() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(false);
+  const { connected } = useConnection();
   const [error, setError] = useState<string | null>(null);
-  const arProvider = useArweaveProvider();
   const {setSelectedUser} = useArweaveProvider()
-  const activeAddress = useActiveAddress();
+
   const wait = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -42,13 +42,21 @@ export function useVideos() {
     try {
       setLoading(true);
       setError(null);
-      // console.log("fetching videos with profile: ", arProvider.profile);
-      if (arProvider.profile) {
+      console.log("connect status before fetch: ", connected);
+      if(connected) {
+        console.log("fetching videos with profile");
+        // First fetch user profile
+        const userDetails = await fetchPlayerProfile();
+        if (!userDetails) {
+          throw new Error("Failed to fetch user profile");
+        }
+
+        // Then use the wallet address to fetch videos
         const msgRes = await message({
           process: processId,
           tags: [
             { name: "Action", value: "List-Posts-Likes" },
-            { name: "Author-Id", value: arProvider.profile.walletAddress },
+            { name: "Author-Id", value: userDetails.id },
           ],
           signer: createDataItemSigner(window.arweaveWallet),
         });
@@ -95,7 +103,6 @@ export function useVideos() {
           liked: post.Liked,
           bookmarked: post.Bookmarked
         }));
-        console.log("videos: ", videos);
 
         setVideos(videos);
         return videos;
@@ -159,15 +166,8 @@ export function useVideos() {
   };
 
   const fetchPlayerProfile = async () => {
-    if (!activeAddress) {
-      console.error("No active address");
-      return null;
-    }
-
-    if (!arProvider.profile) {
-      console.log("No profile found, create a profile first");
-      return null;
-    }
+    if(!connected) return;
+    const userAddress = await window.arweaveWallet.getActiveAddress()
 
     try {
       setLoading(true);
@@ -183,7 +183,7 @@ export function useVideos() {
             },
           ],
           signer: createDataItemSigner(window.arweaveWallet),
-          data: JSON.stringify({ Address: activeAddress }),
+          data: JSON.stringify({ Address: userAddress }),
         });
         return JSON.parse(response.Messages[0].Data);
       });
@@ -212,10 +212,7 @@ export function useVideos() {
       }
 
       const userDetails = {
-        id: activeAddress,
-        // name: profileRes.Profile.DisplayName || "ANON",
-        // score: 0,
-        // bazarId: profileIdRes[0].ProfileId,
+        id: userAddress,
         walletAddress: profileRes.Owner || "no owner",
         displayName: profileRes.Profile.DisplayName || "ANON",
         username: profileRes.Profile.UserName || "unknown",
@@ -225,16 +222,7 @@ export function useVideos() {
         version: profileRes.Profile.Version || 1,
       };
 
-      console.log("userDetails", userDetails);
-      // if (arProvider?.profile) {
-      arProvider.profile = userDetails;
-      // }
-
       setSelectedUser(userDetails);
-      
-      // Fetch videos after profile is set
-      await fetchVideos();
-
       return userDetails;
     } catch (err) {
       const errorMessage =
@@ -248,10 +236,11 @@ export function useVideos() {
   };
 
   useEffect(() => {
-    if (activeAddress && window.arweaveWallet) {
-      fetchPlayerProfile();
+    if (window.arweaveWallet) {
+      // fetchPlayerProfile();
+      fetchVideos();
     }
-  }, [activeAddress, arProvider.profile]);
+}, [connected]);
 
   return {
     videos,
