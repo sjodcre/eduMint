@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import VideoUploader from '../videoUploader';
+import VideoUploader from '../VideoUploader';
 import { useContext } from 'react';
 import { ScreenContext } from '@/context/ScreenContext';
 export default function Upload() {

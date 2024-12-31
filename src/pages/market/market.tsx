@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 import { BookOpen, GraduationCap, Coins, Heart, School, Star } from 'lucide-react'
 
 interface Course {

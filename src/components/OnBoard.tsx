@@ -1,5 +1,5 @@
 import { ConnectButton } from "@arweave-wallet-kit/react";
-import AppCreateButton from "./addApp";
+import AppCreateButton from "./AddApp";
 import EdumintLogo from "/logo-black-icon.png"
 
 import {Link} from 'react-router-dom'

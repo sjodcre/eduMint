@@ -1,54 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useConnection } from '@arweave-wallet-kit/react';
-import { Buffer } from 'buffer';
 import { Button } from './ui/button';
-import { toast } from '../components/useToast';
-import { TagType } from '@/lib/ProfileUtils';
+import { toast } from './ui/use-toast';
 // import { useArweaveProvider } from '@/context/ProfileContext';
 import { connect as aoConnect, createDataItemSigner, message, result } from '@permaweb/aoconnect';
-import { GATEWAYS, getGQLData } from '@/lib/utils';
+import { getGQLData } from '@/shared/lib/gql-queries';
 import { Upload } from 'lucide-react';
 import { Progress } from './ui/progress';
-import { processId } from "@/config/config";
-
-
-interface Video {
-  id: string;
-  file: File;
-  preview: string;
-  size: number;
-}
-
-export async function fileToBuffer(file: File): Promise<Buffer> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-
-		reader.onload = () => {
-			const arrayBuffer = reader.result as ArrayBuffer;
-			const buffer = Buffer.from(arrayBuffer);
-			resolve(buffer);
-		};
-
-		reader.onerror = (error) => {
-			reject(error);
-		};
-
-		reader.readAsArrayBuffer(file);
-	});
-}
-
-export function cleanProcessField(value: string) {
-	let updatedValue: string;
-	updatedValue = value.replace(/\[|\]/g, '');
-	return `[[${updatedValue}]]`;
-}
-
-interface UploadVideosProps {
-  onUpload: (videoTxId: string | null, title: string, description: string) => void;
-  onCancel: () => void;
-  
-}
+import { processId, GATEWAYS } from "@/shared/config/config";
+import { TagType, UploadVideosProps, Video } from '@/shared/types/common';
+import { cleanProcessField, fileToBuffer } from '@/shared/utils/utils';
 
 
 const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {

@@ -8,7 +8,7 @@ import { ScreenProvider } from "./context/ScreenContext";
 import { ArweaveWalletKit } from "@arweave-wallet-kit/react";
 import othent from "@arweave-wallet-kit/othent-strategy";
 import ArweaveWebWalletStrategy from "@arweave-wallet-kit/webwallet-strategy";
-import { ArweaveProvider } from "./context/ProfileContext";
+import { ArweaveProvider } from "./context/ArweaveProvider";
 import { BrowserRouter } from "react-router-dom";
 
 registerSW();
