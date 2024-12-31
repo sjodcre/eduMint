@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import type { Video } from "@/types/user";
-import { useArweaveProvider } from "@/context/ProfileContext";
+import type { Video } from "@/shared/types/user";
+import { useArweaveProvider } from "@/context/ArweaveProvider";
 import {
   createDataItemSigner,
   dryrun,
   message,
   result,
 } from "@permaweb/aoconnect";
-import { processId } from "@/config/config";
+import { processId } from "@/shared/config/config";
 import { useConnection } from "@arweave-wallet-kit/react";
 
 const MAX_RETRIES = 3;

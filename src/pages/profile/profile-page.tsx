@@ -1,13 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "@/types/user";
+import { User } from "@/shared/types/user";
 import { dryrun } from "@permaweb/aoconnect";
 import { useConnection } from "@arweave-wallet-kit/react";
 import { useState, useEffect } from "react";
-import { useArweaveProvider } from "@/context/ProfileContext";
-import { processId } from "@/config/config";
+import { useArweaveProvider } from "@/context/ArweaveProvider";
+import { processId } from "@/shared/config/config";
 import { Button } from "@/components/ui/button";
-import { fetchUserProfile } from "@/lib/ProfileUtils";
+import { fetchUserProfile } from "@/shared/lib/profile-queries";
 
 //@ts-ignore
 export default function ProfilePage({ user: initialUser } : {user: User | null}) {

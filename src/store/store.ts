@@ -6,8 +6,8 @@ import {
   message,
   result,
 } from "@permaweb/aoconnect";
-import { processId } from "@/config/config";
-import type { Video, UserDetails } from "@/types/user";
+import { processId } from "@/shared/config/config";
+import type { Video, UserDetails } from "@/shared/types/user";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;

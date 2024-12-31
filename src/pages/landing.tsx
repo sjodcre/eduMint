@@ -1,10 +1,10 @@
 import { Bookmark, DollarSign, Heart, Share2 } from "lucide-react";
-import { Button } from "./ui/button";
-import { useVideos } from "@/hooks/useVideos";
+import { Button } from "../components/ui/button";
+import { useVideos } from "@/hooks/use-videos";
 import { useState, useEffect, useRef, useContext } from "react";
-import { AvatarFallback, AvatarImage, Avatar } from "./ui/avatar";
-import { User, Video } from "@/types/user";
-import { BottomNav, Navbar } from "./navbar";
+import { AvatarFallback, AvatarImage, Avatar } from "../components/ui/avatar";
+import { User, Video } from "@/shared/types/user";
+import { BottomNav, Navbar } from "../components/Navbar";
 import { ScreenContext } from "@/context/ScreenContext";
 
 export default function Landing() {

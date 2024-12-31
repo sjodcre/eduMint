@@ -2,9 +2,10 @@
 
 import React from 'react';
 import arconnect from '/pre.png';
-import { getProfileByWalletAddress } from '@/lib/ProfileUtils';
 import { useConnection } from '@arweave-wallet-kit/react';
-import { User } from '@/types/user';
+import { User } from '@/shared/types/user';
+import { ProfileHeaderType } from '@/shared/types/common';
+import { getProfileByWalletAddress } from '@/api/profile-api';
 
 // import { connect } from '@othent/kms';
 // import * as Othent from '@othent/kms';
@@ -57,19 +58,6 @@ interface ArweaveContextState {
 interface ArweaveProviderProps {
   children: React.ReactNode;
 }
-
-export type AOProfileType = {
-  id: string;
-  walletAddress: string;
-  displayName: string | null;
-  username: string | null;
-  bio: string | null;
-  profileImage: string | null;
-  banner: string | null;
-  version: string | null;
-};
-
-export type ProfileHeaderType = AOProfileType;
 
 const DEFAULT_CONTEXT: ArweaveContextState = {
   wallets: [],

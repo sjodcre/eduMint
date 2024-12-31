@@ -1,32 +1,6 @@
-import { processIdRegistry } from '@/config/config';
-import { ProfileHeaderType } from '@/context/ProfileContext';
-import { dryrun } from '@permaweb/aoconnect';
-// import { useArweaveProvider } from 'providers/ArweaveProvider';
-
-export async function fetchUserProfile(walletAddress: string): Promise<ProfileHeaderType> {
-    const emptyProfile: ProfileHeaderType = {
-        id: '', // Changed from null to empty string to match ProfileHeaderType
-        walletAddress: walletAddress,
-        displayName: null,
-        username: null,
-        bio: null,
-        profileImage: null,
-        banner: null,
-        version: null,
-    };
-
-    if (!walletAddress) {
-        return emptyProfile; // Return empty profile if no wallet address
-    }
-
-    try {
-        const fetchedProfile = await getProfileByWalletAddress({ address: walletAddress });
-        return fetchedProfile || emptyProfile; // Return fetched profile or empty profile
-    } catch (error) {
-        console.error('Error fetching profile:', error);
-        return emptyProfile; // Return empty profile on error
-    }
-}
+import { processIdRegistry } from "@/shared/config/config";
+import { ProfileHeaderType, TagType } from "@/shared/types/common";
+import { dryrun } from "@permaweb/aoconnect";
 
 export async function getProfileByWalletAddress(args: { address: string }): Promise<ProfileHeaderType | null> {
 	const emptyProfile = {
@@ -77,8 +51,6 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
 		throw new Error(e);
 	}
 }
-
-export type TagType = { name: string; value: string };
 
 
 export async function readHandler(args: {

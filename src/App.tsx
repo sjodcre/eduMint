@@ -1,12 +1,13 @@
-import VideoFeed from "./components/videoFeed";
+import VideoFeed from "./components/VideoFeed";
 import { ScreenContext } from "./context/ScreenContext";
-import OnBoard from "./components/onBoard";
+import OnBoard from "./components/OnBoard";
 import { useContext } from "react";
-import ProfilePage from "./components/profile/profilePage";
-import { useArweaveProvider } from "./context/ProfileContext";
-import { BottomNav } from "./components/navbar";
+import ProfilePage from "./pages/profile/profile-page";
+import { useArweaveProvider } from "./context/ArweaveProvider";
+import { BottomNav } from "./components/Navbar";
 import Upload from "./components/ui/upload.";
-import { Market } from "./components/market/market";
+import { Market } from "./pages/market/market";
+import { Toaster } from "./components/ui/toaster";
 
 export default function App() {
   const { currentScreen } = useContext(ScreenContext);
@@ -18,6 +19,7 @@ export default function App() {
       {currentScreen === "upload" && <Upload />}
       {currentScreen === "market" && <Market />}
       {currentScreen === "profile" && <ProfilePage user={selectedUser || null}/>}
+      <Toaster />
       <BottomNav/>
     </div>
   );

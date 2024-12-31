@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Upload } from 'lucide-react';
-import type {UDLLicense} from "../../types/user"
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '../ui/drawer';
-import { Button } from '../ui/button';
+import type {UDLLicense} from "../../shared/types/user"
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '../../components/ui/drawer';
+import { Button } from '../../components/ui/button';
 
 // interface CreatePostDrawerProps {
 //   onSubmit: (data: PostFormData) => void;

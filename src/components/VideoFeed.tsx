@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { Heart, Bookmark, BadgeDollarSign } from "lucide-react";
-import { useVideos } from "../hooks/useVideos";
-import { Video, User } from "../types/user";
-import { useArweaveProvider } from "@/context/ProfileContext";
+import { useVideos } from "../hooks/use-videos";
+import { Video, User } from "../shared/types/user";
+import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { ScreenContext } from "@/context/ScreenContext";
 import { createDataItemSigner, message, result } from "@permaweb/aoconnect";
-import { processId } from "@/config/config";
-import { transferAR } from "@/lib/TransferAR";
+import { processId } from "@/shared/config/config";
+import { transferAR } from "@/shared/lib/tip";
 import { useConnection } from "@arweave-wallet-kit/react";
 
 export default function VideoFeed() {
