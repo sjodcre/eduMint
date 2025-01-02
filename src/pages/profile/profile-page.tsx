@@ -2,16 +2,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@/shared/types/user";
 import { dryrun } from "@permaweb/aoconnect";
-import { useConnection } from "@arweave-wallet-kit/react";
+// import { useConnection } from "@arweave-wallet-kit/react";
 import { useState, useEffect } from "react";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { processId } from "@/shared/config/config";
 import { Button } from "@/components/ui/button";
 import { fetchUserProfile } from "@/shared/lib/profile-queries";
+import WalletConnection from "@/components/WalletConnect";
 
 //@ts-ignore
 export default function ProfilePage({ user: initialUser } : {user: User | null}) {
-  const { connected, connect: connectWallet } = useConnection();
+  // const { connected, connect: connectWallet } = useConnection();
   const arProvider = useArweaveProvider();
   const [isLoading, setIsLoading] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
@@ -24,9 +25,11 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
   useEffect(() => {
     
     const fetchInitialProfile = async () => {
+      // if (!connected) return;
+      console.log("arProvider.walletAddress at profile page fetchInitialProfile fn: ", arProvider.walletAddress);
+      if (arProvider.walletAddress === null) return;
       const userAddress = await window.arweaveWallet.getActiveAddress()
       console.log("userAddress: ", userAddress);
-      if (!connected) return;
       
       try {
         const profile = await fetchUserProfile(userAddress || "");
@@ -73,11 +76,14 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
 
   useEffect(() => {
     const getProfile = async () => {
-      const userAddress = await window.arweaveWallet.getActiveAddress()
-      if (!connected || !userAddress) return;
+      console.log("arProvider.walletAddress at profile page getProfile fn: ", arProvider.walletAddress);
+      if (arProvider.walletAddress === null) return;
+      // if (!connected) return;
+      // const userAddress = await window.arweaveWallet.getActiveAddress()
+      // if (!userAddress) return;
       
       try {
-        const profile = await fetchUserProfile(userAddress);
+        const profile = await fetchUserProfile(arProvider.walletAddress);
         
         if (profile.version === null) {
           setUser({
@@ -118,19 +124,24 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
     };
 
     getProfile();
-  }, [connected, arProvider.profile?.walletAddress]);
+  // }, [connected, arProvider.profile?.walletAddress]);
+  }, [arProvider.walletAddress, arProvider.profile?.walletAddress]);
+
 
   const fetchBookmarkedPosts = async () => {
-    if (!connected) return;
+    console.log("arProvider.walletAddress at profile page fetchBookmarkedPosts fn: ", arProvider.walletAddress);
+    if (!arProvider.walletAddress) return;
+    // if (!connected) return;
     // if (!arProvider.profile) return;
-    const userAddress = await window.arweaveWallet.getActiveAddress()
+    // const userAddress = await window.arweaveWallet.getActiveAddress()
     setIsLoading(true);
     try {
       const response = await dryrun({
         process: processId,
         tags: [
           { name: "Action", value: "Get-Bookmarked-Posts" },
-          { name: "Author-Id", value: userAddress },
+          // { name: "Author-Id", value: userAddress },
+          { name: "Author-Id", value: arProvider.walletAddress },
         ],
       });
       const parsedPosts = response.Messages.map((msg) => {
@@ -152,16 +163,18 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
   };
 
   const fetchUserPosts = async () => {
-    if (!connected) return;
-    // if (!arProvider.profile) return;
-    const userAddress = await window.arweaveWallet.getActiveAddress()
+    // if (!connected) return;
+    console.log("arProvider.walletAddress at profile page fetchUserPosts fn: ", arProvider.walletAddress);
+    if (!arProvider.walletAddress) return;
+    // const userAddress = await window.arweaveWallet.getActiveAddress()
     setIsLoading(true);
     try {
       const response = await dryrun({
         process: processId,
         tags: [
           { name: "Action", value: "List-User-Posts" },
-          { name: "Author-Id", value: userAddress },
+          // { name: "Author-Id", value: userAddress },
+          { name: "Author-Id", value: arProvider.walletAddress },
         ],
       });
 
@@ -189,16 +202,17 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
     } else if (activeTab === "saved") {
       fetchBookmarkedPosts();
     }
-  }, [activeTab, connected]);
+  // }, [activeTab, connected]);
+}, [activeTab, arProvider.walletAddress]);
 
-  if (!connected) {
+  console.log("arProvider.walletAddress at profile page: ", arProvider.walletAddress);
+  // if (!connected) {
+  if (arProvider.walletAddress === null) {
     return (
       <div className="min-h-screen bg-zinc-900 text-white flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Connect Your Wallet</h1>
         <p className="text-zinc-400 mb-6">Please connect your wallet to view your profile</p>
-        <Button onClick={connectWallet} className="bg-blue-500 hover:bg-blue-600">
-          Connect Wallet
-        </Button>
+        <WalletConnection />
       </div>
     );
   }

@@ -8,7 +8,8 @@ import {
   result,
 } from "@permaweb/aoconnect";
 import { processId } from "@/shared/config/config";
-import { useConnection } from "@arweave-wallet-kit/react";
+// import { useConnection } from "@arweave-wallet-kit/react";
+import { getProfileByWalletAddress } from "@/api/profile-api";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
@@ -16,9 +17,9 @@ const RETRY_DELAY = 1000;
 export function useVideos() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(false);
-  const { connected } = useConnection();
+  // const { connected } = useConnection();
   const [error, setError] = useState<string | null>(null);
-  const {setSelectedUser} = useArweaveProvider()
+  const {setSelectedUser, walletAddress, wallet} = useArweaveProvider()
 
   const wait = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
@@ -42,15 +43,16 @@ export function useVideos() {
     try {
       setLoading(true);
       setError(null);
-      console.log("connect status before fetch: ", connected);
-      if(connected) {
+      // console.log("connect status before fetch: ", connected);
+      console.log("walletAddress at fetch videos function: ", walletAddress);
+      if(walletAddress !== null) {
         console.log("fetching videos with profile");
         // First fetch user profile
-        const userDetails = await fetchPlayerProfile();
+        const userDetails = await fetchPlayerProfile(walletAddress);
         if (!userDetails) {
           throw new Error("Failed to fetch user profile");
         }
-
+        console.log("userDetails at use-videos: ", userDetails);
         // Then use the wallet address to fetch videos
         const msgRes = await message({
           process: processId,
@@ -58,13 +60,15 @@ export function useVideos() {
             { name: "Action", value: "List-Posts-Likes" },
             { name: "Author-Id", value: userDetails.id },
           ],
-          signer: createDataItemSigner(window.arweaveWallet),
+          // signer: createDataItemSigner(window.arweaveWallet),
+          signer: createDataItemSigner(wallet),
         });
 
         const postResult = await result({
           process: processId,
           message: msgRes,
         });
+        console.log("postResult at use-videos: ", postResult);
 
         const parsedPosts = postResult.Messages.map((msg: any) => {
           const parsedData = JSON.parse(msg.Data);
@@ -165,62 +169,109 @@ export function useVideos() {
     }
   };
 
-  const fetchPlayerProfile = async () => {
-    if(!connected) return;
-    const userAddress = await window.arweaveWallet.getActiveAddress()
-
+  const fetchPlayerProfile = async (walletAddress: string) => {
+    // if(!connected) return;
+    console.log("walletAddress at fetch player profile function: ", walletAddress);
+    if(walletAddress===null) return;
+    // console.log("active address: ", window.arweaveWallet.getActiveAddress());
+    // const userAddress = await window.arweaveWallet.getActiveAddress()
+    // console.log("userAddress at fetch player profile function: ", userAddress);
     try {
       setLoading(true);
       setError(null);
 
-      const profileIdRes = await fetchWithRetry(async () => {
-        const response = await dryrun({
-          process: "SNy4m-DrqxWl01YqGM4sxI8qCni-58re8uuJLvZPypY",
-          tags: [
-            {
-              name: "Action",
-              value: "Get-Profiles-By-Delegate",
-            },
-          ],
-          signer: createDataItemSigner(window.arweaveWallet),
-          data: JSON.stringify({ Address: userAddress }),
-        });
-        return JSON.parse(response.Messages[0].Data);
-      });
+      // const profileIdRes = await fetchWithRetry(async () => {
+      //   const response = await dryrun({
+      //     process: "SNy4m-DrqxWl01YqGM4sxI8qCni-58re8uuJLvZPypY",
+      //     tags: [
+      //       {
+      //         name: "Action",
+      //         value: "Get-Profiles-By-Delegate",
+      //       },
+      //     ],
+      //     signer: createDataItemSigner(window.arweaveWallet),
+      //     data: JSON.stringify({ Address: userAddress }),
+      //   });
+      //   return JSON.parse(response.Messages[0].Data);
+      // });
 
-      if (!profileIdRes?.[0]?.ProfileId) {
-        throw new Error("No profile ID found");
-      }
+      // if (!profileIdRes?.[0]?.ProfileId) {
+      //   throw new Error("No profile ID found");
+      // }
+
+      // const profileRes = await fetchWithRetry(async () => {
+      //   const response = await dryrun({
+      //     process: profileIdRes[0].ProfileId,
+      //     tags: [
+      //       {
+      //         name: "Action",
+      //         value: "Info",
+      //       },
+      //     ],
+      //     signer: createDataItemSigner(window.arweaveWallet),
+      //     data: "",
+      //   });
+      //   return JSON.parse(response.Messages[0].Data);
+      // });
+
+      // if (!profileRes?.Profile) {
+      //   throw new Error("Invalid profile data");
+      // }
 
       const profileRes = await fetchWithRetry(async () => {
-        const response = await dryrun({
-          process: profileIdRes[0].ProfileId,
-          tags: [
-            {
-              name: "Action",
-              value: "Info",
-            },
-          ],
-          signer: createDataItemSigner(window.arweaveWallet),
-          data: "",
-        });
-        return JSON.parse(response.Messages[0].Data);
+        // return await getProfileByWalletAddress({ address: userAddress });
+        return await getProfileByWalletAddress({ address: walletAddress });
       });
+      console.log("profileRes at use-videos: ", profileRes);
 
-      if (!profileRes?.Profile) {
-        throw new Error("Invalid profile data");
-      }
+      // if (profileRes?.version === null) {
+      //   setSelectedUser({
+      //     id: userAddress,
+      //     walletAddress: profileRes.walletAddress || "no owner",
+      //     displayName: profileRes?.displayName || "ANON",
+      //     username: "no owner", 
+      //     bio: profileRes?.bio || "",
+      //     profileImage: "/default-avatar.png",
+      //     banner: "default-banner.png",
+      //     version: 1,
+        
+      //   });
+      // } else {
+        // setSelectedUser({
+        //   id: userAddress,
+        //   walletAddress: profileRes?.walletAddress || "no owner",
+        //   displayName: profileRes?.displayName || "ANON",
+        //   username: profileRes?.username || "unknown",
+        //   bio: profileRes?.bio || "",
+        //   profileImage: profileRes?.profileImage || "/default-avatar.png",
+        //   banner: profileRes?.banner || "default-banner.png",
+        //   version: profileRes?.version ? parseInt(profileRes.version) : 1,
+
+        // });
+      // }
 
       const userDetails = {
-        id: userAddress,
-        walletAddress: profileRes.Owner || "no owner",
-        displayName: profileRes.Profile.DisplayName || "ANON",
-        username: profileRes.Profile.UserName || "unknown",
-        bio: profileRes.Profile.Bio || "",
-        profileImage: profileRes.Profile.ProfileImage || "default-avatar.png",
-        banner: profileRes.Profile.CoverImage || "default-banner.png",
-        version: profileRes.Profile.Version || 1,
+          // id: userAddress,
+          id: walletAddress,
+          walletAddress: profileRes?.walletAddress || "no owner",
+          displayName: profileRes?.displayName || "ANON",
+          username: profileRes?.username || "unknown",
+          bio: profileRes?.bio || "",
+          profileImage: profileRes?.profileImage || "/default-avatar.png",
+          banner: profileRes?.banner || "default-banner.png",
+          version: profileRes?.version ? parseInt(profileRes.version) : 1,
       };
+
+      // const userDetails = {
+      //   id: userAddress,
+      //   walletAddress: profileRes.Owner || "no owner",
+      //   displayName: profileRes.Profile.DisplayName || "ANON",
+      //   username: profileRes.Profile.UserName || "unknown",
+      //   bio: profileRes.Profile.Bio || "",
+      //   profileImage: profileRes.Profile.ProfileImage || "default-avatar.png",
+      //   banner: profileRes.Profile.CoverImage || "default-banner.png",
+      //   version: profileRes.Profile.Version || 1,
+      // };
 
       setSelectedUser(userDetails);
       return userDetails;
@@ -239,8 +290,10 @@ export function useVideos() {
     if (window.arweaveWallet) {
       // fetchPlayerProfile();
       fetchVideos();
+      console.log("useVideos useEffect fetch videos ");
     }
-}, [connected]);
+// }, [connected]);
+  }, [walletAddress]);
 
   return {
     videos,

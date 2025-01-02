@@ -7,7 +7,8 @@ import { ScreenContext } from "@/context/ScreenContext";
 import { createDataItemSigner, message, result } from "@permaweb/aoconnect";
 import { processId } from "@/shared/config/config";
 import { transferAR } from "@/shared/lib/tip";
-import { useConnection } from "@arweave-wallet-kit/react";
+import { toast } from "./ui/use-toast";
+// import { useConnection } from "@arweave-wallet-kit/react";
 
 export default function VideoFeed() {
   const { videos, loading, refetch: fetchVideos, error } = useVideos();
@@ -17,23 +18,29 @@ export default function VideoFeed() {
   const [videoStatus, setVideoStatus] = useState<boolean>(false);
 
   // @ts-ignore
-  const { setSelectedUser } = useArweaveProvider()
+  const { setSelectedUser, walletAddress, wallet } = useArweaveProvider()
   const { setCurrentScreen } = useContext(ScreenContext)
-  const { connected, connect } = useConnection();
+  // const { connected, connect } = useConnection();
 
   const checkWalletConnection = async () => {
-    if (!connected) {
+    // if (!connected) {
+    if (walletAddress === null) {
+      console.log("no active address when checking wallet connection")
+      toast({
+        title: "Please connect your Arweave wallet!",
+        description: `You must connect your Arweave wallet to continue.`,
+      })
       // Show popup/modal to connect wallet
-      const shouldConnect = window.confirm("Please connect your Arweave wallet to continue. Would you like to connect now?");
-      if (shouldConnect) {
-        try {
-          await connect();
-          return true;
-        } catch (error) {
-          console.error("Failed to connect wallet:", error);
-          return false;
-        }
-      }
+      // const shouldConnect = window.confirm("Please connect your Arweave wallet to continue. Would you like to connect now?");
+      // if (shouldConnect) {
+      //   try {
+      //     await connect();
+      //     return true;
+      //   } catch (error) {
+      //     console.error("Failed to connect wallet:", error);
+      //     return false;
+      //   }
+      // }
       return false;
     }
     return true;
@@ -102,7 +109,9 @@ export default function VideoFeed() {
             { name: "Action", value: "Save-Post" },
             { name: "PostID", value: video.autoId.toString() },
           ],
-          signer: createDataItemSigner(window.arweaveWallet),
+          // signer: createDataItemSigner(window.arweaveWallet),
+          signer: createDataItemSigner(wallet),
+
         });
         console.log("Save Post result", res);
 
@@ -139,7 +148,8 @@ export default function VideoFeed() {
             { name: "Action", value: "Unsave-Post" },
             { name: "PostID", value: video.autoId.toString() },
           ],
-          signer: createDataItemSigner(window.arweaveWallet),
+          // signer: createDataItemSigner(window.arweaveWallet),
+          signer: createDataItemSigner(wallet),
         });
         console.log("Unsave Post result", res);
 
@@ -202,7 +212,8 @@ export default function VideoFeed() {
           { name: "PostId", value: video.autoId.toString() },
         ],
         // data: "",
-        signer: createDataItemSigner(window.arweaveWallet),
+        // signer: createDataItemSigner(window.arweaveWallet),
+        signer: createDataItemSigner(wallet),
       });
 
       console.log("Unlike Post result", result);
@@ -230,7 +241,8 @@ export default function VideoFeed() {
           { name: "PostId", value: video.autoId.toString() },
         ],
         // data: "",
-        signer: createDataItemSigner(window.arweaveWallet),
+        // signer: createDataItemSigner(window.arweaveWallet),
+        signer: createDataItemSigner(wallet),
       });
 
       console.log("Like Post result", result);
@@ -321,7 +333,7 @@ function VideoCard({
     // @ts-ignore
   const [isLiked, setIsLiked] = useState(video.liked);
   const arProvider = useArweaveProvider();
-  const { connected, connect } = useConnection();
+  // const { connected, connect } = useConnection();
 
   useEffect(() => {
     const options = {
@@ -357,18 +369,28 @@ function VideoCard({
   // };
 
   const handleSendTip = async () => {
-    if (!connected) {
-      const shouldConnect = window.confirm("Please connect your Arweave wallet to send a tip. Would you like to connect now?");
-      if (shouldConnect) {
-        try {
-          await connect();
-        } catch (error) {
-          console.error("Failed to connect wallet:", error);
-          return;
-        }
-      } else {
-        return;
-      }
+    // if (!connected) {
+    //   const shouldConnect = window.confirm("Please connect your Arweave wallet to send a tip. Would you like to connect now?");
+    //   if (shouldConnect) {
+    //     try {
+    //       await connect();
+    //     } catch (error) {
+    //       console.error("Failed to connect wallet:", error);
+    //       return;
+    //     }
+    //   } else {
+    //     return;
+    //   }
+    // }
+
+    // if (!arProvider.walletAddress) {
+    if (arProvider.walletAddress === null) {
+      console.log("no active address when checking wallet connection")
+      toast({
+        title: "Please connect your Arweave wallet!",
+        description: `You must connect your Arweave wallet to continue.`,
+      })
+      return;
     }
 
     console.log("arProvider.profile", arProvider.profile);

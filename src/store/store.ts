@@ -2,12 +2,13 @@
 import { create } from "zustand";
 import {
   createDataItemSigner,
-  dryrun,
+  // dryrun,
   message,
   result,
 } from "@permaweb/aoconnect";
 import { processId } from "@/shared/config/config";
 import type { Video, UserDetails } from "@/shared/types/user";
+import { getProfileByWalletAddress } from "@/api/profile-api";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
@@ -45,42 +46,61 @@ export const useStore = create<StoreState>((set) => ({
     set({ loading: true, error: null });
     try {
       // Fetch profile ID
-      const profileIdRes = await fetchWithRetry(async () => {
-        const response = await dryrun({
-          process: "SNy4m-DrqxWl01YqGM4sxI8qCni-58re8uuJLvZPypY",
-          tags: [{ name: "Action", value: "Get-Profiles-By-Delegate" }],
-          signer: createDataItemSigner(window.arweaveWallet),
-          data: JSON.stringify({ Address: activeAddress }),
-        });
-        return JSON.parse(response.Messages[0].Data);
-      });
+      // const profileIdRes = await fetchWithRetry(async () => {
+      //   const response = await dryrun({
+      //     process: "SNy4m-DrqxWl01YqGM4sxI8qCni-58re8uuJLvZPypY",
+      //     tags: [{ name: "Action", value: "Get-Profiles-By-Delegate" }],
+      //     signer: createDataItemSigner(window.arweaveWallet),
+      //     data: JSON.stringify({ Address: activeAddress }),
+      //   });
+      //   return JSON.parse(response.Messages[0].Data);
+      // });
 
-      // Fetch profile details
+      // // Fetch profile details
+      // const profileRes = await fetchWithRetry(async () => {
+      //   const response = await dryrun({
+      //     process: "YourProcessId",
+      //     tags: [{ name: "Action", value: "Info" }],
+      //     signer: createDataItemSigner(window.arweaveWallet),
+      //     data: "",
+      //   });
+      //   return JSON.parse(response.Messages[0].Data);
+      // });
+
+      // // Set user details
+      // const userDetails: UserDetails = {
+      //   id: activeAddress,
+      //   name: profileRes.Profile.DisplayName || "ANON",
+      //   score: 0,
+      //   bazarId: profileIdRes[0].ProfileId,
+      //   walletAddress: profileRes.Owner || "no owner",
+      //   displayName: profileRes.Profile.DisplayName || "ANON",
+      //   username: profileRes.Profile.UserName || "unknown",
+      //   bio: profileRes.Profile.Bio || "",
+      //   avatar: profileRes.Profile.ProfileImage || "default-avatar.png",
+      //   banner: profileRes.Profile.CoverImage || "default-banner.png",
+      //   version: profileRes.Profile.Version || 1,
+      // };
       const profileRes = await fetchWithRetry(async () => {
-        const response = await dryrun({
-          process: "YourProcessId",
-          tags: [{ name: "Action", value: "Info" }],
-          signer: createDataItemSigner(window.arweaveWallet),
-          data: "",
-        });
-        return JSON.parse(response.Messages[0].Data);
+        return await getProfileByWalletAddress({ address: activeAddress });
       });
-
-      // Set user details
-      const userDetails: UserDetails = {
+      console.log("profileRes at use-videos: ", profileRes);
+      
+      const userDetails: UserDetails= {
         id: activeAddress,
-        name: profileRes.Profile.DisplayName || "ANON",
+        name: profileRes.displayName || "ANON",
         score: 0,
-        bazarId: profileIdRes[0].ProfileId,
-        walletAddress: profileRes.Owner || "no owner",
-        displayName: profileRes.Profile.DisplayName || "ANON",
-        username: profileRes.Profile.UserName || "unknown",
-        bio: profileRes.Profile.Bio || "",
-        avatar: profileRes.Profile.ProfileImage || "default-avatar.png",
-        banner: profileRes.Profile.CoverImage || "default-banner.png",
-        version: profileRes.Profile.Version || 1,
-      };
+        bazarId: profileRes.id,
+        walletAddress: profileRes?.walletAddress || "no owner",
+        displayName: profileRes?.displayName || "ANON",
+        username: profileRes?.username || "unknown",
+        bio: profileRes?.bio || "",
+        avatar: profileRes?.profileImage || "/default-avatar.png",
+        banner: profileRes?.banner || "default-banner.png",
+        version: profileRes?.version || 1,
+    };
 
+      console.log("userDetails at store: ", userDetails);
       set({ userDetails });
 
       // Fetch videos
