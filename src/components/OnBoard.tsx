@@ -1,5 +1,6 @@
-import { ConnectButton } from "@arweave-wallet-kit/react";
+// import { ConnectButton } from "@arweave-wallet-kit/react";
 import AppCreateButton from "./AddApp";
+import WalletConnection from "./WalletConnect";
 import EdumintLogo from "/logo-black-icon.png"
 
 import {Link} from 'react-router-dom'
@@ -28,8 +29,9 @@ export default function LandingPage() {
           <Link className="text-sm font-medium hover:underline underline-offset-4" to="#">
             About
           </Link> */}
-          
-          <ConnectButton/>
+          <WalletConnection />
+
+          {/* <ConnectButton/> */}
         </nav>
       </header>
    <main className="flex-1 flex flex-col justify-center">

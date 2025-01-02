@@ -2,12 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import ArConnect from "@arweave-wallet-kit/arconnect-strategy"
+// import ArConnect from "@arweave-wallet-kit/arconnect-strategy"
 import { registerSW } from "virtual:pwa-register";
 import { ScreenProvider } from "./context/ScreenContext";
-import { ArweaveWalletKit } from "@arweave-wallet-kit/react";
-import othent from "@arweave-wallet-kit/othent-strategy";
-import ArweaveWebWalletStrategy from "@arweave-wallet-kit/webwallet-strategy";
+// import { ArweaveWalletKit } from "@arweave-wallet-kit/react";
+// import othent from "@arweave-wallet-kit/othent-strategy";
+// import ArweaveWebWalletStrategy from "@arweave-wallet-kit/webwallet-strategy";
 import { ArweaveProvider } from "./context/ArweaveProvider";
 import { BrowserRouter } from "react-router-dom";
 
@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <ScreenProvider>
-        <ArweaveWalletKit
+        {/* <ArweaveWalletKit
           config={{
             permissions: [
               "ACCESS_ADDRESS",
@@ -30,11 +30,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           theme={{
             displayTheme: "dark",
           }}
-        >
+        > */}
           <ArweaveProvider>
             <App />
           </ArweaveProvider>
-        </ArweaveWalletKit>
+        {/* </ArweaveWalletKit> */}
       </ScreenProvider>
     </BrowserRouter>
   </React.StrictMode>,

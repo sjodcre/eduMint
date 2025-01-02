@@ -6,13 +6,14 @@ import { AvatarFallback, AvatarImage, Avatar } from "../components/ui/avatar";
 import { User, Video } from "@/shared/types/user";
 import { BottomNav, Navbar } from "../components/Navbar";
 import { ScreenContext } from "@/context/ScreenContext";
+import { useArweaveProvider } from "@/context/ArweaveProvider";
 
 export default function Landing() {
   const { videos, loading, error } = useVideos();
   const [localVideos, setLocalVideos] = useState(videos);
   const {setCurrentScreen} = useContext(ScreenContext)
-  // @ts-ignore
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  // const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const {setSelectedUser} = useArweaveProvider()
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     setLocalVideos(videos);
