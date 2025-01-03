@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
-import { useArweaveProvider, WalletEnum } from '../context/ArweaveProvider';
+import React, { useState } from "react";
+import { useArweaveProvider, WalletEnum } from "../context/ArweaveProvider";
 
 const WalletConnection: React.FC = () => {
-  const {
-    wallet,
-    walletAddress,
-    walletType,
-    handleConnect,
-    handleDisconnect,
-    setWalletModalVisible,
-  } = useArweaveProvider();
+  const { walletAddress, walletType, handleConnect, handleDisconnect } =
+    useArweaveProvider();
 
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -45,7 +39,7 @@ const WalletConnection: React.FC = () => {
           >
             Connect
           </button>
-          
+
           {showDropdown && (
             <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-black border border-white ring-1 ring-white ring-opacity-5">
               <div className="py-1">

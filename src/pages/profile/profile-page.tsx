@@ -6,12 +6,15 @@ import { dryrun } from "@permaweb/aoconnect";
 import { useState, useEffect } from "react";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { processId } from "@/shared/config/config";
-import { Button } from "@/components/ui/button";
 import { fetchUserProfile } from "@/shared/lib/profile-queries";
 import WalletConnection from "@/components/WalletConnect";
 
 //@ts-ignore
-export default function ProfilePage({ user: initialUser } : {user: User | null}) {
+export default function ProfilePage({
+  user: initialUser,
+}: {
+  user: User | null;
+}) {
   // const { connected, connect: connectWallet } = useConnection();
   const arProvider = useArweaveProvider();
   const [isLoading, setIsLoading] = useState(false);
@@ -23,79 +26,81 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
   // const activeAddress = useActiveAddress();
 
   useEffect(() => {
-    
     const fetchInitialProfile = async () => {
       // if (!connected) return;
-      console.log("arProvider.walletAddress at profile page fetchInitialProfile fn: ", arProvider.walletAddress);
+      console.log(
+        "arProvider.walletAddress at profile page fetchInitialProfile fn: ",
+        arProvider.walletAddress,
+      );
       if (arProvider.walletAddress === null) return;
-      const userAddress = await window.arweaveWallet.getActiveAddress()
+      const userAddress = await window.arweaveWallet.getActiveAddress();
       console.log("userAddress: ", userAddress);
-      
+
       try {
         const profile = await fetchUserProfile(userAddress || "");
         console.log("profile: ", profile);
         if (profile.version === null) {
           setUser({
             id: "ANON",
-            username: "ANON", 
+            username: "ANON",
             displayName: "ANON",
             profileImage: "/default-avatar.png",
             tier: "bronze",
             followers: 0,
-            following: 0
-          
+            following: 0,
           });
         } else {
           setUser({
             id: profile.walletAddress,
-            username: profile.username || "unknown", 
+            username: profile.username || "unknown",
             displayName: profile.displayName || "ANON",
             profileImage: profile.profileImage || "/default-avatar.png",
             tier: "bronze",
             followers: 0,
-            following: 0
+            following: 0,
           });
         }
       } catch (error) {
         console.error("Error fetching initial profile:", error);
         setUser({
           id: "ANON",
-          username: "ANON", 
+          username: "ANON",
           displayName: "ANON",
           profileImage: "/default-avatar.png",
           tier: "bronze",
           followers: 0,
-          following: 0
-        
-        });      }
+          following: 0,
+        });
+      }
     };
 
     fetchInitialProfile();
   }, []);
 
-
   useEffect(() => {
     const getProfile = async () => {
-      console.log("arProvider.walletAddress at profile page getProfile fn: ", arProvider.walletAddress);
+      console.log(
+        "arProvider.walletAddress at profile page getProfile fn: ",
+        arProvider.walletAddress,
+      );
       if (arProvider.walletAddress === null) return;
       // if (!connected) return;
       // const userAddress = await window.arweaveWallet.getActiveAddress()
       // if (!userAddress) return;
-      
+
       try {
         const profile = await fetchUserProfile(arProvider.walletAddress);
-        
+
         if (profile.version === null) {
           setUser({
             id: "ANON",
-            username: "ANON", 
+            username: "ANON",
             displayName: "ANON",
             profileImage: "/default-avatar.png",
             tier: "bronze",
             followers: 0,
-            following: 0
-          
-          }); 
+            following: 0,
+          });
         } else {
           // Convert profile to User type and set it
           setUser({
@@ -105,7 +110,7 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
             profileImage: profile.profileImage || "/default-avatar.png",
             tier: "bronze", // Default value
             followers: 0, // Default value
-            following: 0 // Default value
+            following: 0, // Default value
           });
           fetchUserPosts();
         }
@@ -113,23 +118,25 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
         console.error("Error fetching profile:", error);
         setUser({
           id: "ANON",
-          username: "ANON", 
+          username: "ANON",
           displayName: "ANON",
           profileImage: "/default-avatar.png",
           tier: "bronze",
           followers: 0,
-          following: 0
-        
-        });      }
+          following: 0,
+        });
+      }
     };
 
     getProfile();
-  // }, [connected, arProvider.profile?.walletAddress]);
+    // }, [connected, arProvider.profile?.walletAddress]);
   }, [arProvider.walletAddress, arProvider.profile?.walletAddress]);
 
-
   const fetchBookmarkedPosts = async () => {
-    console.log("arProvider.walletAddress at profile page fetchBookmarkedPosts fn: ", arProvider.walletAddress);
+    console.log(
+      "arProvider.walletAddress at profile page fetchBookmarkedPosts fn: ",
+      arProvider.walletAddress,
+    );
     if (!arProvider.walletAddress) return;
     // if (!connected) return;
     // if (!arProvider.profile) return;
@@ -146,12 +153,12 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
       });
       const parsedPosts = response.Messages.map((msg) => {
         const parsedData = JSON.parse(msg.Data);
-      //   return parsedData;
-      console.log("parsedPosts before mapping: ", parsedData);
-      return parsedData.map((post: any) => ({
+        //   return parsedData;
+        console.log("parsedPosts before mapping: ", parsedData);
+        return parsedData.map((post: any) => ({
           ...post,
           LikeCount: post.LikeCount || 0, // Ensure LikeCount defaults to 0
-          }));
+        }));
       });
       console.log("parsedPosts after mapping: ", parsedPosts[0]);
       setBookmarkedPosts(parsedPosts[0]);
@@ -164,7 +171,10 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
 
   const fetchUserPosts = async () => {
     // if (!connected) return;
-    console.log("arProvider.walletAddress at profile page fetchUserPosts fn: ", arProvider.walletAddress);
+    console.log(
+      "arProvider.walletAddress at profile page fetchUserPosts fn: ",
+      arProvider.walletAddress,
+    );
     if (!arProvider.walletAddress) return;
     // const userAddress = await window.arweaveWallet.getActiveAddress()
     setIsLoading(true);
@@ -202,21 +212,25 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
     } else if (activeTab === "saved") {
       fetchBookmarkedPosts();
     }
-  // }, [activeTab, connected]);
-}, [activeTab, arProvider.walletAddress]);
+    // }, [activeTab, connected]);
+  }, [activeTab, arProvider.walletAddress]);
 
-  console.log("arProvider.walletAddress at profile page: ", arProvider.walletAddress);
+  console.log(
+    "arProvider.walletAddress at profile page: ",
+    arProvider.walletAddress,
+  );
   // if (!connected) {
   if (arProvider.walletAddress === null) {
     return (
       <div className="min-h-screen bg-zinc-900 text-white flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Connect Your Wallet</h1>
-        <p className="text-zinc-400 mb-6">Please connect your wallet to view your profile</p>
+        <p className="text-zinc-400 mb-6">
+          Please connect your wallet to view your profile
+        </p>
         <WalletConnection />
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white">
@@ -232,14 +246,18 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
             <p className="text-sm text-zinc-400">@{user?.username}</p>
           </div>
           <div className="ml-auto">
-          {/* user points */}
+            {/* user points */}
             <span className="text-sm">{100} points</span>
           </div>
         </div>
       </div>
 
       {/* Tabs and Content */}
-      <Tabs defaultValue="videos" className="w-full" onValueChange={setActiveTab}>
+      <Tabs
+        defaultValue="videos"
+        className="w-full"
+        onValueChange={setActiveTab}
+      >
         <TabsList className="w-full justify-start bg-zinc-800 p-0 h-12">
           <TabsTrigger
             value="videos"
@@ -264,13 +282,16 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
           <div className="grid grid-cols-3 gap-4">
             {isLoading ? (
               Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="aspect-square bg-zinc-800 rounded-lg animate-pulse" />
+                <div
+                  key={i}
+                  className="aspect-square bg-zinc-800 rounded-lg animate-pulse"
+                />
               ))
             ) : userPosts.length > 0 ? (
               userPosts.map((post: any, i) => (
                 <div key={i} className="flex flex-col">
                   <div className="aspect-square bg-zinc-800 rounded-lg overflow-hidden">
-                    <video 
+                    <video
                       src={`https://arweave.net/${post.VideoTxId}`}
                       className="w-full h-full object-cover"
                       autoPlay
@@ -279,26 +300,32 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
                       playsInline
                     />
                   </div>
-                  <p className="mt-2 text-sm text-center truncate">{post.Title}</p>
+                  <p className="mt-2 text-sm text-center truncate">
+                    {post.Title}
+                  </p>
                 </div>
               ))
             ) : (
-              <div className="col-span-3 text-center text-zinc-500">No videos found</div>
+              <div className="col-span-3 text-center text-zinc-500">
+                No videos found
+              </div>
             )}
-
           </div>
         </TabsContent>
         <TabsContent value="saved" className="p-4">
           <div className="grid grid-cols-3 gap-4">
             {isLoading ? (
               Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="aspect-square bg-zinc-800 rounded-lg animate-pulse" />
+                <div
+                  key={i}
+                  className="aspect-square bg-zinc-800 rounded-lg animate-pulse"
+                />
               ))
             ) : bookmarkedPosts.length > 0 ? (
               bookmarkedPosts.map((post: any, i) => (
                 <div key={i} className="flex flex-col">
                   <div className="aspect-square bg-zinc-800 rounded-lg overflow-hidden">
-                    <video 
+                    <video
                       src={`https://arweave.net/${post.VideoTxId}`}
                       className="w-full h-full object-cover"
                       autoPlay
@@ -307,11 +334,15 @@ export default function ProfilePage({ user: initialUser } : {user: User | null})
                       playsInline
                     />
                   </div>
-                  <p className="mt-2 text-sm text-center truncate">{post.Title}</p>
+                  <p className="mt-2 text-sm text-center truncate">
+                    {post.Title}
+                  </p>
                 </div>
               ))
             ) : (
-              <div className="col-span-3 text-center text-zinc-500">No saved videos found</div>
+              <div className="col-span-3 text-center text-zinc-500">
+                No saved videos found
+              </div>
             )}
           </div>
         </TabsContent>
