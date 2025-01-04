@@ -39,77 +39,100 @@ export function useVideos() {
     }
   };
 
+  const mapPostsToVideos = (parsedPosts: any[]) => {
+    return parsedPosts.flat().map((post: any) => ({
+      id: post.ID,
+      autoId: post.AutoID,
+      videoUrl: `https://arweave.net/${post.VideoTxId}`,
+      title: post.Title,
+      user: {
+        id: post.AuthorWallet,
+        username: post.Author,
+        profileImage: '/logo-black-icon.svg',
+        tier: "bronze",
+        followers: 0,
+        following: 0,
+        displayName: post.Author
+      },
+      likes: post.LikeCount,
+      likeSummary: {
+        PostID: post.AutoID,
+        LikeCount: post.LikeCount
+      },
+      comments: 0,
+      description: post.Body,
+      price: post.Price,
+      sellingStatus: post.SellingStatus,
+      liked: post.Liked ?? false,
+      bookmarked: post.Bookmarked ?? false
+    }));
+  };
+
   const fetchVideos = async () => {
     try {
       setLoading(true);
       setError(null);
-      // console.log("connect status before fetch: ", connected);
-      console.log("walletAddress at fetch videos function: ", walletAddress);
+
       if(walletAddress !== null) {
-        console.log("fetching videos with profile");
-        // First fetch user profile
         const userDetails = await fetchPlayerProfile(walletAddress);
         if (!userDetails) {
           throw new Error("Failed to fetch user profile");
         }
-        console.log("userDetails at use-videos: ", userDetails);
-        // Then use the wallet address to fetch videos
-        const msgRes = await message({
-          process: processId,
-          tags: [
-            { name: "Action", value: "List-Posts-Likes" },
-            { name: "Author-Id", value: userDetails.id },
-          ],
-          // signer: createDataItemSigner(window.arweaveWallet),
-          signer: createDataItemSigner(wallet),
-        });
 
-        const postResult = await result({
-          process: processId,
-          message: msgRes,
-        });
-        console.log("postResult at use-videos: ", postResult);
+        if (userDetails.version !== null) {
+          console.log("fetching videos with profile");
+          const msgRes = await message({
+            process: processId,
+            tags: [
+              { name: "Action", value: "List-Posts-Likes" },
+              { name: "Author-Id", value: userDetails.id },
+            ],
+            signer: createDataItemSigner(wallet),
+          });
 
-        const parsedPosts = postResult.Messages.map((msg: any) => {
-          const parsedData = JSON.parse(msg.Data);
-          return parsedData.map((post: any) => ({
-            ...post,
-            Liked: post.Liked === 1,
-            LikeCount: post.LikeCount || 0,
-            SellingStatus: post.SellingStatus === 1,
-            Bookmarked: post.Bookmarked === 1,
-          }));
-        });
+          const postResult = await result({
+            process: processId,
+            message: msgRes,
+          });
+          console.log("postResult at use-videos: ", postResult);
 
-        const videos = parsedPosts.flat().map((post: any) => ({
-          id: post.ID,
-          autoId: post.AutoID,
-          videoUrl: `https://arweave.net/${post.VideoTxId}`,
-          title: post.Title,
-          user: {
-            id: post.AuthorWallet,
-            username: post.Author,
-            profileImage: '/logo-black-icon.svg',
-            tier: "bronze",
-            followers: 0,
-            following: 0,
-            displayName: post.Author
-          },
-          likes: post.LikeCount,
-          likeSummary: {
-            PostID: post.AutoID,
-            LikeCount: post.LikeCount
-          },
-          comments: 0,
-          description: post.Body,
-          price: post.Price,
-          sellingStatus: post.SellingStatus,
-          liked: post.Liked,
-          bookmarked: post.Bookmarked
-        }));
+          const parsedPosts = postResult.Messages.map((msg: any) => {
+            const parsedData = JSON.parse(msg.Data);
+            return parsedData.map((post: any) => ({
+              ...post,
+              Liked: post.Liked === 1,
+              LikeCount: post.LikeCount || 0,
+              SellingStatus: post.SellingStatus === 1,
+              Bookmarked: post.Bookmarked === 1,
+            }));
+          });
 
-        setVideos(videos);
-        return videos;
+          const videos = mapPostsToVideos(parsedPosts);
+          setVideos(videos);
+          return videos;
+
+        } else {
+          console.log("fetching videos without profile");
+          const response = await dryrun({
+            process: processId,
+            tags: [{ name: "Action", value: "List-Posts" }],
+          });
+
+          const parsedPosts = response.Messages.map((msg: any) => {
+            const parsedData = JSON.parse(msg.Data);
+            return parsedData.map((post: any) => ({
+              ...post,
+              LikeCount: post.LikeCount || 0,
+              Liked: false,
+              SellingStatus: post.SellingStatus === 1,
+              Bookmarked: false
+            }));
+          });
+
+          const videos = mapPostsToVideos(parsedPosts);
+          setVideos(videos);
+          return videos;
+        }
 
       } else {
         console.log("fetching videos without profile");
@@ -129,33 +152,7 @@ export function useVideos() {
           }));
         });
 
-        const videos = parsedPosts.flat().map((post: any) => ({
-          id: post.ID,
-          autoId: post.AutoID,
-          videoUrl: `https://arweave.net/${post.VideoTxId}`,
-          title: post.Title,
-          user: {
-            id: post.AuthorWallet,
-            username: post.Author,
-            profileImage: '/logo-black-icon.svg',
-            tier: "bronze",
-            followers: 0,
-            following: 0,
-            displayName: post.Author
-          },
-          likes: post.LikeCount,
-          likeSummary: {
-            PostID: post.AutoID,
-            LikeCount: post.LikeCount
-          },
-          comments: 0,
-          description: post.Body,
-          price: post.Price,
-          sellingStatus: post.SellingStatus,
-          liked: false,
-          bookmarked: false
-        }));
-
+        const videos = mapPostsToVideos(parsedPosts);
         setVideos(videos);
         return videos;
       }
@@ -253,13 +250,13 @@ export function useVideos() {
       const userDetails = {
           // id: userAddress,
           id: walletAddress,
-          walletAddress: profileRes?.walletAddress || "no owner",
-          displayName: profileRes?.displayName || "ANON",
-          username: profileRes?.username || "unknown",
-          bio: profileRes?.bio || "",
-          profileImage: profileRes?.profileImage || "/default-avatar.png",
-          banner: profileRes?.banner || "default-banner.png",
-          version: profileRes?.version ? parseInt(profileRes.version) : 1,
+          walletAddress: profileRes?.walletAddress,
+          displayName: profileRes?.displayName,
+          username: profileRes?.username,
+          bio: profileRes?.bio ,
+          profileImage: profileRes?.profileImage ,
+          banner: profileRes?.banner ,
+          version: profileRes?.version,
       };
 
       // const userDetails = {
