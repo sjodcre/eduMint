@@ -2,55 +2,116 @@ import { processIdRegistry } from "@/shared/config/config";
 import { ProfileHeaderType, TagType } from "@/shared/types/common";
 import { dryrun } from "@permaweb/aoconnect";
 
-export async function getProfileByWalletAddress(args: { address: string }): Promise<ProfileHeaderType | null> {
+// export async function getProfileByWalletAddress(args: { address: string }): Promise<ProfileHeaderType | null> {
+// 	const emptyProfile = {
+// 		id: "",
+// 		walletAddress: args.address,
+// 		displayName: null,
+// 		username: null,
+// 		bio: null,
+// 		profileImage: null,
+// 		banner: null,
+// 		version: null,
+// 	};
+
+// 	try {
+// 		console.log("fetching profile for: ", args.address);
+// 		const profileLookup = await readHandler({
+// 			processId: processIdRegistry, 
+// 			action: 'Get-Profiles-By-Delegate',
+// 			data: { Address: args.address },
+// 		});
+// 		console.log("profileLookup: ", profileLookup);
+// 		let activeProfileId: string = "";
+// 		if (profileLookup && profileLookup.length > 0 && profileLookup[0].ProfileId) {
+// 			activeProfileId = profileLookup[0].ProfileId;
+// 		}
+// 		console.log("activeProfileId: ", activeProfileId);
+// 		if (activeProfileId) {
+// 			const fetchedProfile = await readHandler({
+// 				processId: activeProfileId,
+// 				action: 'Info',
+// 				data: null,
+// 			});
+// 			console.log("fetchedProfile: ", fetchedProfile);
+// 			if (fetchedProfile) {
+// 				return {
+// 					id: activeProfileId,
+// 					walletAddress: fetchedProfile.Owner || null,
+// 					displayName: fetchedProfile.Profile.DisplayName || null,
+// 					username: fetchedProfile.Profile.UserName || null,
+// 					bio: fetchedProfile.Profile.Description || null,
+// 					profileImage: fetchedProfile.Profile.ProfileImage || null,
+// 					banner: fetchedProfile.Profile.CoverImage || null,
+// 					version: fetchedProfile.Profile.Version || null,
+// 				};
+// 			} else return emptyProfile;
+// 		} else return emptyProfile;
+// 	} catch (e: any) {
+// 		throw new Error(e);
+// 	}
+// }
+
+export async function getProfileByWalletAddress(
+	args: { address: string },
+	setIsProfileLoading: (isLoading: boolean) => void
+  ): Promise<ProfileHeaderType | null> {
 	const emptyProfile = {
-		id: "",
-		walletAddress: args.address,
-		displayName: null,
-		username: null,
-		bio: null,
-		profileImage: null,
-		banner: null,
-		version: null,
+	  id: "",
+	  walletAddress: args.address,
+	  displayName: null,
+	  username: null,
+	  bio: null,
+	  profileImage: null,
+	  banner: null,
+	  version: null,
 	};
 
+	if (!args.address) {
+        return emptyProfile; // Return empty profile if no wallet address
+    }
+  
+	setIsProfileLoading(true);
+  
 	try {
-		console.log("fetching profile for: ", args.address);
-		const profileLookup = await readHandler({
-			processId: processIdRegistry, 
-			action: 'Get-Profiles-By-Delegate',
-			data: { Address: args.address },
+	  console.log("fetching profile for: ", args.address);
+	  const profileLookup = await readHandler({
+		processId: processIdRegistry,
+		action: "Get-Profiles-By-Delegate",
+		data: { Address: args.address },
+	  });
+	  console.log("profileLookup: ", profileLookup);
+	  let activeProfileId: string = "";
+	  if (profileLookup && profileLookup.length > 0 && profileLookup[0].ProfileId) {
+		activeProfileId = profileLookup[0].ProfileId;
+	  }
+	  console.log("activeProfileId: ", activeProfileId);
+	  if (activeProfileId) {
+		const fetchedProfile = await readHandler({
+		  processId: activeProfileId,
+		  action: "Info",
+		  data: null,
 		});
-		console.log("profileLookup: ", profileLookup);
-		let activeProfileId: string = "";
-		if (profileLookup && profileLookup.length > 0 && profileLookup[0].ProfileId) {
-			activeProfileId = profileLookup[0].ProfileId;
-		}
-		console.log("activeProfileId: ", activeProfileId);
-		if (activeProfileId) {
-			const fetchedProfile = await readHandler({
-				processId: activeProfileId,
-				action: 'Info',
-				data: null,
-			});
-			console.log("fetchedProfile: ", fetchedProfile);
-			if (fetchedProfile) {
-				return {
-					id: activeProfileId,
-					walletAddress: fetchedProfile.Owner || null,
-					displayName: fetchedProfile.Profile.DisplayName || null,
-					username: fetchedProfile.Profile.UserName || null,
-					bio: fetchedProfile.Profile.Description || null,
-					profileImage: fetchedProfile.Profile.ProfileImage || null,
-					banner: fetchedProfile.Profile.CoverImage || null,
-					version: fetchedProfile.Profile.Version || null,
-				};
-			} else return emptyProfile;
+		console.log("fetchedProfile: ", fetchedProfile);
+		if (fetchedProfile) {
+		  return {
+			id: activeProfileId,
+			walletAddress: fetchedProfile.Owner || null,
+			displayName: fetchedProfile.Profile.DisplayName || null,
+			username: fetchedProfile.Profile.UserName || null,
+			bio: fetchedProfile.Profile.Description || null,
+			profileImage: fetchedProfile.Profile.ProfileImage || null,
+			banner: fetchedProfile.Profile.CoverImage || null,
+			version: fetchedProfile.Profile.Version || null,
+		  };
 		} else return emptyProfile;
+	  } else return emptyProfile;
 	} catch (e: any) {
-		throw new Error(e);
+	  throw new Error(e);
+	} finally {
+	  setIsProfileLoading(false);
 	}
-}
+  }
 
 
 export async function readHandler(args: {

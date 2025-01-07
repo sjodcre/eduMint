@@ -19,7 +19,7 @@ export function useVideos() {
   const [loading, setLoading] = useState(false);
   // const { connected } = useConnection();
   const [error, setError] = useState<string | null>(null);
-  const {setSelectedUser, walletAddress, wallet} = useArweaveProvider()
+  const {setSelectedUser, walletAddress, wallet, setIsProfileLoading} = useArweaveProvider()
 
   const wait = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
@@ -217,7 +217,7 @@ export function useVideos() {
 
       const profileRes = await fetchWithRetry(async () => {
         // return await getProfileByWalletAddress({ address: userAddress });
-        return await getProfileByWalletAddress({ address: walletAddress });
+        return await getProfileByWalletAddress({ address: walletAddress }, setIsProfileLoading);
       });
       console.log("profileRes at use-videos: ", profileRes);
 
