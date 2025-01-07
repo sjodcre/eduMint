@@ -13,7 +13,7 @@ import { BrowserRouter } from "react-router-dom";
 
 registerSW();
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <BrowserRouter>
       <ScreenProvider>
         {/* <ArweaveWalletKit
@@ -37,5 +37,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         {/* </ArweaveWalletKit> */}
       </ScreenProvider>
     </BrowserRouter>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 );

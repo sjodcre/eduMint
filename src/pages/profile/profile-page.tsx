@@ -6,7 +6,7 @@ import { dryrun } from "@permaweb/aoconnect";
 import { useState, useEffect } from "react";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { processId } from "@/shared/config/config";
-import { fetchUserProfile } from "@/shared/lib/profile-queries";
+// import { fetchUserProfile } from "@/shared/lib/profile-queries";
 import WalletConnection from "@/components/WalletConnect";
 
 //@ts-ignore
@@ -16,128 +16,76 @@ export default function ProfilePage({
   user: User | null;
 }) {
   // const { connected, connect: connectWallet } = useConnection();
-  const arProvider = useArweaveProvider();
+  // const arProvider = useArweaveProvider();
+  const {selectedUser, profile, walletAddress, isProfileLoading} = useArweaveProvider()
   const [isLoading, setIsLoading] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("videos");
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
   // const [user, setUser] = useState<User | null>(initialUser);
-  const [user, setUser] = useState<User>();
   // const activeAddress = useActiveAddress();
+  // const fetchAndSetUserProfile = async () => {
+  //   console.log("fetchAndSetUserProfile fn called");
+  //   if (arProvider.walletAddress === null) return;
 
-  useEffect(() => {
-    const fetchInitialProfile = async () => {
-      // if (!connected) return;
-      console.log(
-        "arProvider.walletAddress at profile page fetchInitialProfile fn: ",
-        arProvider.walletAddress,
-      );
-      if (arProvider.walletAddress === null) return;
-      const userAddress = await window.arweaveWallet.getActiveAddress();
-      console.log("userAddress: ", userAddress);
+  //   try {
+  //     const profile = await fetchUserProfile(arProvider.walletAddress);
+  //     console.log("profile fetched for fetchAndSetUserProfile fn: ", profile);
+  //     if (profile.version === null) {
+  //       // setUser({
+  //       //   id: "ANON", 
+  //       //   username: "ANON",
+  //       //   displayName: "ANON",
+  //       //   profileImage: "/default-avatar.png",
+  //       //   tier: "bronze",
+  //       //   followers: 0,
+  //       //   following: 0,
+  //       // });
+  //       setUser(undefined);
+  //     } else {
+  //       setUser({
+  //         id: profile.walletAddress,
+  //         username: profile.username || "unknown",
+  //         displayName: profile.displayName || "ANON", 
+  //         profileImage: profile.profileImage || "/default-avatar.png",
+  //         tier: "bronze",
+  //         followers: 0,
+  //         following: 0,
+  //       });
+  //       fetchUserPosts();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching profile:", error);
+  //     setUser({
+  //       id: "ANON",
+  //       username: "ANON", 
+  //       displayName: "ANON",
+  //       profileImage: "/default-avatar.png",
+  //       tier: "bronze",
+  //       followers: 0,
+  //       following: 0,
+  //     });
+  //   }
+  // };
+  console.log("selectedUser at profile page: ", selectedUser);
+  console.log("profile at profile page: ", profile);
+  // // Initial fetch on component mount
+  // useEffect(() => {
+  //   fetchAndSetUserProfile();
+  // }, []);
 
-      try {
-        const profile = await fetchUserProfile(userAddress || "");
-        console.log("profile: ", profile);
-        if (profile.version === null) {
-          setUser({
-            id: "ANON",
-            username: "ANON",
-            displayName: "ANON",
-            profileImage: "/default-avatar.png",
-            tier: "bronze",
-            followers: 0,
-            following: 0,
-          });
-        } else {
-          setUser({
-            id: profile.walletAddress,
-            username: profile.username || "unknown",
-            displayName: profile.displayName || "ANON",
-            profileImage: profile.profileImage || "/default-avatar.png",
-            tier: "bronze",
-            followers: 0,
-            following: 0,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching initial profile:", error);
-        setUser({
-          id: "ANON",
-          username: "ANON",
-          displayName: "ANON",
-          profileImage: "/default-avatar.png",
-          tier: "bronze",
-          followers: 0,
-          following: 0,
-        });
-      }
-    };
-
-    fetchInitialProfile();
-  }, []);
-
-  useEffect(() => {
-    const getProfile = async () => {
-      console.log(
-        "arProvider.walletAddress at profile page getProfile fn: ",
-        arProvider.walletAddress,
-      );
-      if (arProvider.walletAddress === null) return;
-      // if (!connected) return;
-      // const userAddress = await window.arweaveWallet.getActiveAddress()
-      // if (!userAddress) return;
-
-      try {
-        const profile = await fetchUserProfile(arProvider.walletAddress);
-
-        if (profile.version === null) {
-          setUser({
-            id: "ANON",
-            username: "ANON",
-            displayName: "ANON",
-            profileImage: "/default-avatar.png",
-            tier: "bronze",
-            followers: 0,
-            following: 0,
-          });
-        } else {
-          // Convert profile to User type and set it
-          setUser({
-            id: profile.walletAddress,
-            username: profile.username || "unknown",
-            displayName: profile.displayName || "ANON",
-            profileImage: profile.profileImage || "/default-avatar.png",
-            tier: "bronze", // Default value
-            followers: 0, // Default value
-            following: 0, // Default value
-          });
-          fetchUserPosts();
-        }
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        setUser({
-          id: "ANON",
-          username: "ANON",
-          displayName: "ANON",
-          profileImage: "/default-avatar.png",
-          tier: "bronze",
-          followers: 0,
-          following: 0,
-        });
-      }
-    };
-
-    getProfile();
-    // }, [connected, arProvider.profile?.walletAddress]);
-  }, [arProvider.walletAddress, arProvider.profile?.walletAddress]);
+  // Fetch when wallet address changes
+  // useEffect(() => {
+  //   console.log("wallet changed!")
+  //   fetchAndSetUserProfile();
+  // }, [arProvider.walletAddress]);
 
   const fetchBookmarkedPosts = async () => {
     console.log(
       "arProvider.walletAddress at profile page fetchBookmarkedPosts fn: ",
-      arProvider.walletAddress,
+      walletAddress,
     );
-    if (!arProvider.walletAddress) return;
+    if (!walletAddress) return;
     // if (!connected) return;
     // if (!arProvider.profile) return;
     // const userAddress = await window.arweaveWallet.getActiveAddress()
@@ -148,7 +96,7 @@ export default function ProfilePage({
         tags: [
           { name: "Action", value: "Get-Bookmarked-Posts" },
           // { name: "Author-Id", value: userAddress },
-          { name: "Author-Id", value: arProvider.walletAddress },
+          { name: "Author-Id", value: walletAddress },
         ],
       });
       const parsedPosts = response.Messages.map((msg) => {
@@ -173,9 +121,9 @@ export default function ProfilePage({
     // if (!connected) return;
     console.log(
       "arProvider.walletAddress at profile page fetchUserPosts fn: ",
-      arProvider.walletAddress,
+      walletAddress,
     );
-    if (!arProvider.walletAddress) return;
+    if (!walletAddress) return;
     // const userAddress = await window.arweaveWallet.getActiveAddress()
     setIsLoading(true);
     try {
@@ -184,9 +132,11 @@ export default function ProfilePage({
         tags: [
           { name: "Action", value: "List-User-Posts" },
           // { name: "Author-Id", value: userAddress },
-          { name: "Author-Id", value: arProvider.walletAddress },
+          { name: "Author-Id", value: walletAddress },
         ],
       });
+
+      console.log("response from list-user-posts", response);
 
       const parsedPosts = response.Messages.map((msg) => {
         const parsedData = JSON.parse(msg.Data);
@@ -213,14 +163,27 @@ export default function ProfilePage({
       fetchBookmarkedPosts();
     }
     // }, [activeTab, connected]);
-  }, [activeTab, arProvider.walletAddress]);
+  }, [activeTab, profile, selectedUser]);
 
-  console.log(
-    "arProvider.walletAddress at profile page: ",
-    arProvider.walletAddress,
-  );
+  // console.log(
+  //   "arProvider.walletAddress at profile page: ",
+  //   arProvider.walletAddress,
+  // );
   // if (!connected) {
-  if (arProvider.walletAddress === null) {
+
+  if (isProfileLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-900 text-white flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold mb-4">Loading Your Profile...</h1>
+        <p className="text-zinc-400 mb-6">
+          Please wait while we fetch your profile details.
+        </p>
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  
+  if (walletAddress === null) {
     return (
       <div className="min-h-screen bg-zinc-900 text-white flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Connect Your Wallet</h1>
@@ -232,18 +195,50 @@ export default function ProfilePage({
     );
   }
 
+  if (!selectedUser) {
+    return (
+      <div className="min-h-screen bg-zinc-900 text-white flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold mb-4">Create Your Profile</h1>
+        <div className="text-zinc-400 mb-6 text-center max-w-lg">
+          <p className="mb-4">
+            For now, profiles need to be created through{" "}
+            <a 
+              href="https://bazar.arweave.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              Bazar
+            </a>
+            {" "}({" "}
+            <a
+              href="https://bazar.arweave.dev"
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              https://bazar.arweave.dev
+            </a>
+            {" "}). Connect your wallet and look for the profile creation option in the top right.
+          </p>
+          <p className="text-sm italic">don't worry dawg. we got you. we will be implementing this soon!</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-900 text-white">
       {/* Header */}
       <div className="p-6 space-y-4">
         <div className="flex items-center gap-3">
           <Avatar className="w-12 h-12 border-2 border-zinc-700">
-            <AvatarImage src={user?.profileImage} alt={user?.displayName} />
-            <AvatarFallback>{user?.displayName}</AvatarFallback>
+            <AvatarImage src={selectedUser?.profileImage} alt={selectedUser?.displayName} />
+            <AvatarFallback>{selectedUser?.displayName}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="font-semibold">{user?.displayName}</h1>
-            <p className="text-sm text-zinc-400">@{user?.username}</p>
+            <h1 className="font-semibold">{selectedUser?.displayName}</h1>
+            <p className="text-sm text-zinc-400">@{selectedUser?.username}</p>
           </div>
           <div className="ml-auto">
             {/* user points */}

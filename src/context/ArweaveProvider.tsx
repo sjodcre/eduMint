@@ -56,6 +56,8 @@ interface ArweaveContextState {
   walletModalVisible: boolean;
   setWalletModalVisible: (open: boolean) => void;
   profile: ProfileHeaderType | null;
+  isProfileLoading: boolean;
+  setIsProfileLoading: (isLoading: boolean) => void;
   toggleProfileUpdate: boolean;
   setToggleProfileUpdate: (toggleUpdate: boolean) => void;
   vouch: VouchType | null;
@@ -81,6 +83,8 @@ const DEFAULT_CONTEXT: ArweaveContextState = {
   walletModalVisible: false,
   setWalletModalVisible(_open: boolean) {},
   profile: null,
+  isProfileLoading: false,
+  setIsProfileLoading: (_isLoading: boolean) => {},
   toggleProfileUpdate: false,
   setToggleProfileUpdate(_toggleUpdate: boolean) {},
   vouch: null,
@@ -125,7 +129,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
   // const { connected } = useConnection();
 
   const wallets = AR_WALLETS;
-
+  const [isProfileLoading, setIsProfileLoading] = React.useState<boolean>(false);
   const [wallet, setWallet] = React.useState<any>(null);
   const [walletType, setWalletType] = React.useState<WalletEnum | null>(null);
   const [walletModalVisible, setWalletModalVisible] =
@@ -156,15 +160,45 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
   }, []);
 
   React.useEffect(() => {
+    if (profile===null || profile?.version === null) {
+      setSelectedUser(null);
+    } else {
+      setSelectedUser({
+        id: profile.walletAddress,
+        displayName: profile.displayName || "ANON",
+        username: profile.username || "unknown",
+        profileImage: profile.profileImage || "/default-avatar.png",
+        tier: "bronze", // Default value
+        followers: 0, // Default value  
+        following: 0 // Default value
+      });
+    }
+  }, [profile]);
+
+  React.useEffect(() => {
     (async function () {
       if (wallet && walletAddress) {
+        // setIsProfileLoading(true); // Set loading state to true
         try {
           setProfile(
-            await getProfileByWalletAddress({ address: walletAddress }),
+            await getProfileByWalletAddress({ address: walletAddress }, setIsProfileLoading),
           );
+          console.log("profile at useEffect with wallet, walletAddress, walletType: ", profile);
+          // setSelectedUser(profile ? {
+          //   id: profile.walletAddress,
+          //   displayName: profile.displayName || "ANON",
+          //   username: profile.username || "unknown",
+          //   profileImage: profile.profileImage || "/default-avatar.png",
+          //   tier: "bronze", // Default value
+          //   followers: 0, // Default value  
+          //   following: 0 // Default value
+          // } : null);
         } catch (e: any) {
           console.error(e);
-        }
+        } 
+        // finally {
+        //   setIsProfileLoading(false); // Set loading state to false
+        // }
       }
     })();
     // }, [connected, wallet, walletAddress, walletType]);
@@ -183,12 +217,22 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
               const existingProfile = profile;
               const newProfile = await getProfileByWalletAddress({
                 address: walletAddress,
-              });
+              }, setIsProfileLoading);
 
               if (
                 JSON.stringify(existingProfile) !== JSON.stringify(newProfile)
               ) {
                 setProfile(newProfile);
+                console.log("newProfile at useEffect", newProfile);
+                // setSelectedUser(newProfile ? {
+                //   id: newProfile.walletAddress,
+                //   displayName: newProfile.displayName || "ANON",
+                //   username: newProfile.username || "unknown",
+                //   profileImage: newProfile.profileImage || "/default-avatar.png",
+                //   tier: "bronze", // Default value
+                //   followers: 0, // Default value  
+                //   following: 0 // Default value
+                // } : null);
                 changeDetected = true;
               } else {
                 await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -230,6 +274,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
     if (localStorage.getItem("walletType")) {
       try {
         setProfile(null);
+        // setSelectedUser(null);
         await handleConnect(localStorage.getItem("walletType") as any);
       } catch (e: any) {
         console.error(e);
@@ -347,6 +392,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
     setWallet(null);
     setWalletAddress(null);
     setProfile(null);
+    // setSelectedUser(null);
   }
 
   return (
@@ -365,6 +411,8 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
           walletModalVisible,
           setWalletModalVisible,
           profile,
+          isProfileLoading,
+          setIsProfileLoading,
           toggleProfileUpdate,
           setToggleProfileUpdate,
           vouch,
