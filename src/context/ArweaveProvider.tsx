@@ -1,27 +1,13 @@
 "use client";
 
 import React from "react";
-// import arconnect from '/pre.png';
 import arconnect from "../assets/arconnect.png";
 import othentImage from "../assets/othent.svg";
-// import { useConnection } from '@arweave-wallet-kit/react';
 import { User } from "@/shared/types/user";
 import { ProfileHeaderType } from "@/shared/types/common";
 import { getProfileByWalletAddress } from "@/api/profile-api";
 import othent from "@/shared/lib/othent";
 
-// import { connect } from '@othent/kms';
-// import * as Othent from '@othent/kms';
-
-// import { getProfileByWalletAddress, getVouch, readHandler } from 'api';
-
-// import { Modal } from 'components/molecules/Modal';
-// import { AO, AR_WALLETS, REDIRECTS, WALLET_PERMISSIONS } from 'helpers/config';
-// import { getARBalanceEndpoint } from 'helpers/endpoints';
-// import { VouchType, WalletEnum } from 'helpers/types';
-// import { useLanguageProvider } from 'providers/LanguageProvider';
-
-// import * as S from './styles';
 export enum WalletEnum {
   arConnect = "arconnect",
   othent = "othent",
@@ -40,17 +26,11 @@ export const AR_WALLETS = [
   { type: WalletEnum.othent, logo: othentImage },
 ];
 
-export type VouchType = { score: number; isVouched: boolean };
-
 interface ArweaveContextState {
   wallets: { type: WalletEnum; logo: string }[];
   wallet: any;
   walletAddress: string | null;
   walletType: WalletEnum | null;
-  arBalance: number | null;
-  // tokenBalances: { [address: string]: { profileBalance: number; walletBalance: number } } | null;
-  toggleTokenBalanceUpdate: boolean;
-  setToggleTokenBalanceUpdate: (toggleUpdate: boolean) => void;
   handleConnect: any;
   handleDisconnect: () => void;
   walletModalVisible: boolean;
@@ -58,9 +38,6 @@ interface ArweaveContextState {
   profile: ProfileHeaderType | null;
   isProfileLoading: boolean;
   setIsProfileLoading: (isLoading: boolean) => void;
-  toggleProfileUpdate: boolean;
-  setToggleProfileUpdate: (toggleUpdate: boolean) => void;
-  vouch: VouchType | null;
   selectedUser: User | null;
   setSelectedUser: (user: User | null) => void;
 }
@@ -74,10 +51,6 @@ const DEFAULT_CONTEXT: ArweaveContextState = {
   wallet: null,
   walletAddress: null,
   walletType: null,
-  arBalance: null,
-  // tokenBalances: null,
-  toggleTokenBalanceUpdate: false,
-  setToggleTokenBalanceUpdate(_toggleUpdate: boolean) {},
   handleConnect() {},
   handleDisconnect() {},
   walletModalVisible: false,
@@ -85,9 +58,6 @@ const DEFAULT_CONTEXT: ArweaveContextState = {
   profile: null,
   isProfileLoading: false,
   setIsProfileLoading: (_isLoading: boolean) => {},
-  toggleProfileUpdate: false,
-  setToggleProfileUpdate(_toggleUpdate: boolean) {},
-  vouch: null,
   selectedUser: null,
   setSelectedUser(_user: User | null) {},
 };
@@ -135,16 +105,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
   const [walletModalVisible, setWalletModalVisible] =
     React.useState<boolean>(false);
   const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
-  // @ts-ignore: TS6133
-  const [vouch, setVouch] = React.useState<VouchType | null>(null);
-  // @ts-ignore: TS6133
-  const [arBalance, setArBalance] = React.useState<number | null>(null);
-  const [toggleTokenBalanceUpdate, setToggleTokenBalanceUpdate] =
-    React.useState<boolean>(false);
-
   const [profile, setProfile] = React.useState<ProfileHeaderType | null>(null);
-  const [toggleProfileUpdate, setToggleProfileUpdate] =
-    React.useState<boolean>(false);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
   React.useEffect(() => {
@@ -160,99 +121,34 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
   }, []);
 
   React.useEffect(() => {
-    if (profile===null || profile?.version === null) {
-      setSelectedUser(null);
-    } else {
-      setSelectedUser({
-        id: profile.walletAddress,
-        displayName: profile.displayName || "ANON",
-        username: profile.username || "unknown",
-        profileImage: profile.profileImage || "/default-avatar.png",
-        tier: "bronze", // Default value
-        followers: 0, // Default value  
-        following: 0 // Default value
-      });
-    }
-  }, [profile]);
-
-  React.useEffect(() => {
     (async function () {
       if (wallet && walletAddress) {
-        // setIsProfileLoading(true); // Set loading state to true
         try {
-          setProfile(
-            await getProfileByWalletAddress({ address: walletAddress }, setIsProfileLoading),
-          );
-          console.log("profile at useEffect with wallet, walletAddress, walletType: ", profile);
-          // setSelectedUser(profile ? {
-          //   id: profile.walletAddress,
-          //   displayName: profile.displayName || "ANON",
-          //   username: profile.username || "unknown",
-          //   profileImage: profile.profileImage || "/default-avatar.png",
-          //   tier: "bronze", // Default value
-          //   followers: 0, // Default value  
-          //   following: 0 // Default value
-          // } : null);
+          const fetchedProfile = await getProfileByWalletAddress({ address: walletAddress }, setIsProfileLoading);
+          setProfile(fetchedProfile);
+          console.log("profile at useEffect with wallet, walletAddress, walletType: ", fetchedProfile);
+          
+          if (fetchedProfile === null || fetchedProfile?.version === null) {
+            setSelectedUser(null);
+          } else {
+            setSelectedUser({
+              id: fetchedProfile.walletAddress,
+              displayName: fetchedProfile.displayName || "ANON", 
+              username: fetchedProfile.username || "unknown",
+              profileImage: fetchedProfile.profileImage || "/default-avatar.png",
+              tier: "bronze", // Default value
+              followers: 0, // Default value
+              following: 0 // Default value
+            });
+          }
         } catch (e: any) {
           console.error(e);
-        } 
-        // finally {
-        //   setIsProfileLoading(false); // Set loading state to false
-        // }
+        }
       }
     })();
-    // }, [connected, wallet, walletAddress, walletType]);
-  }, [wallet, walletAddress, walletType]);
+  // }, [wallet, walletAddress, walletType]);
+}, [wallet, walletAddress]);
 
-  React.useEffect(() => {
-    (async function () {
-      if (wallet && walletAddress) {
-        const fetchProfileUntilChange = async () => {
-          let changeDetected = false;
-          let tries = 0;
-          const maxTries = 10;
-
-          while (!changeDetected && tries < maxTries) {
-            try {
-              const existingProfile = profile;
-              const newProfile = await getProfileByWalletAddress({
-                address: walletAddress,
-              }, setIsProfileLoading);
-
-              if (
-                JSON.stringify(existingProfile) !== JSON.stringify(newProfile)
-              ) {
-                setProfile(newProfile);
-                console.log("newProfile at useEffect", newProfile);
-                // setSelectedUser(newProfile ? {
-                //   id: newProfile.walletAddress,
-                //   displayName: newProfile.displayName || "ANON",
-                //   username: newProfile.username || "unknown",
-                //   profileImage: newProfile.profileImage || "/default-avatar.png",
-                //   tier: "bronze", // Default value
-                //   followers: 0, // Default value  
-                //   following: 0 // Default value
-                // } : null);
-                changeDetected = true;
-              } else {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                tries++;
-              }
-            } catch (error) {
-              console.error(error);
-              break;
-            }
-          }
-
-          if (!changeDetected) {
-            console.warn(`No changes detected after ${maxTries} attempts`);
-          }
-        };
-
-        await fetchProfileUntilChange();
-      }
-    })();
-  }, [toggleProfileUpdate]);
 
   // async function handleWallet() {
   //   // console.log("handleWallet localStorage.getItem('walletType'): ", localStorage.getItem('walletType'));
@@ -293,7 +189,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
   // }
 
   async function handleConnect(
-    walletType: WalletEnum.arConnect | WalletEnum.othent,
+    walletType: WalletEnum,
   ) {
     // async function handleConnect() {
     let walletObj: any = null;
@@ -392,7 +288,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
     setWallet(null);
     setWalletAddress(null);
     setProfile(null);
-    // setSelectedUser(null);
+    setSelectedUser(null);
   }
 
   return (
@@ -402,9 +298,6 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
           wallet,
           walletAddress,
           walletType,
-          arBalance,
-          toggleTokenBalanceUpdate,
-          setToggleTokenBalanceUpdate,
           handleConnect,
           handleDisconnect,
           wallets,
@@ -413,9 +306,6 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
           profile,
           isProfileLoading,
           setIsProfileLoading,
-          toggleProfileUpdate,
-          setToggleProfileUpdate,
-          vouch,
           selectedUser,
           setSelectedUser,
         }}
