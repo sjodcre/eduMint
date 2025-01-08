@@ -14,11 +14,7 @@ export default function VideoFeed() {
   const { videos, loading, refetch: fetchVideos, error } = useVideos();
   const [localVideos, setLocalVideos] = useState(videos);
   // const {videos, loading, error, fetchPlayerProfile} = useStore()
-    // @ts-ignore
-  const [videoStatus, setVideoStatus] = useState<boolean>(false);
-
-  // @ts-ignore
-  const { setSelectedUser, walletAddress, wallet } = useArweaveProvider()
+  const { setSelectedUser, walletAddress, wallet, isProfileLoading } = useArweaveProvider()
   const { setCurrentScreen } = useContext(ScreenContext)
   // const { connected, connect } = useConnection();
 
@@ -62,7 +58,6 @@ export default function VideoFeed() {
   // }, []);
 
   useEffect(() => {
-    console.log("Setting local videos when videos changes", videos);
     setLocalVideos(videos);
   }, [videos]);
 
@@ -274,7 +269,7 @@ export default function VideoFeed() {
     setCurrentScreen("profile")
   };
 
-  if (loading && !localVideos.length) {
+  if ((loading && !localVideos.length) || isProfileLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         Loading...

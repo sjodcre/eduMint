@@ -170,7 +170,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
     if (localStorage.getItem("walletType")) {
       try {
         setProfile(null);
-        // setSelectedUser(null);
+        setSelectedUser(null);
         await handleConnect(localStorage.getItem("walletType") as any);
       } catch (e: any) {
         console.error(e);
