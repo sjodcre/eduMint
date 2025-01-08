@@ -5,7 +5,7 @@ import { useContext } from "react";
 import ProfilePage from "./pages/profile/profile-page";
 import { useArweaveProvider } from "./context/ArweaveProvider";
 import { BottomNav } from "./components/Navbar";
-import Upload from "./components/ui/upload.";
+import Upload from "./pages/post/upload.";
 import { Market } from "./pages/market/market";
 import { Toaster } from "./components/ui/toaster";
 

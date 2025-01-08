@@ -20,12 +20,11 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
   // const { connect: connectWallet } = useConnection();
   const [postDescription, setPostDescription] = useState("");
   const [postTitle, setPostTitle] = useState("");
-  // const activeAddress = useActiveAddress();
-  const arProvider = useArweaveProvider();
+  const {walletAddress,selectedUser, wallet} = useArweaveProvider();
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   // const { connected } = useConnection();
-  const activeAddress = arProvider.walletAddress;
+  // const activeAddress = walletAddress;
   const hasLargeVideo = video?.size && video.size > 5 * 1024 * 1024; // 5MB in bytes
 
   const onDrop = useCallback( (acceptedFiles: File[]) => {
@@ -80,7 +79,7 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
         ],
         data: description || "No description",
         // signer: createDataItemSigner(window.arweaveWallet),
-        signer: createDataItemSigner(arProvider.wallet),
+        signer: createDataItemSigner(wallet),
 
       });
 
@@ -120,20 +119,30 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
       setUploadProgress(0)
       return;
     }
-    console.log("activeAddress", activeAddress);
     // if (!connected) {
     //   setUploading(false);
     //   setUploadProgress(0)
     //   await connectWallet();
     // }
 
-    if (activeAddress === null) {
+    if (walletAddress === null) {
       setUploading(false);
       setUploadProgress(0)
       console.log("no active address when uploading video")
       toast({
         title: "Please connect your Arweave wallet!",
         description: `You must connect your Arweave wallet to continue.`,
+      })
+      return
+    }
+
+    if (selectedUser === null) {
+      setUploading(false);
+      setUploadProgress(0)
+      console.log("no profile when uploading video")
+      toast({
+        title: "Please create a profile at bazar first!",
+        description: `You must create a profile at bazar first to continue. Go to profile for more details.`,
       })
       return
     }
@@ -220,7 +229,7 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
                             module: "Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350",
                             scheduler: "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA",
                             // signer: createDataItemSigner(window.arweaveWallet),
-                            signer: createDataItemSigner(arProvider.wallet),
+                            signer: createDataItemSigner(wallet),
                             tags: assetTags,
                             data: buffer,
                         });
@@ -273,7 +282,7 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
                     const evalMessage = await aos.message({
                         process: processId,
                         // signer: createDataItemSigner(window.arweaveWallet),
-                        signer: createDataItemSigner(arProvider.wallet),
+                        signer: createDataItemSigner(wallet),
                         tags: [{ name: 'Action', value: 'Eval' }],
                         data: processSrc || "",
                     });
@@ -287,7 +296,7 @@ const VideoUploader: React.FC<UploadVideosProps> = ({ onUpload }) => {
                         await aos.message({
                             process: processId,
                             // signer: createDataItemSigner(window.arweaveWallet),
-                            signer: createDataItemSigner(arProvider.wallet),
+                            signer: createDataItemSigner(wallet),
                             tags: [
                                 { name: 'Action', value: 'Add-Asset-To-Profile' },
                                 // { name: 'ProfileProcess', value: arProvider?.profile?.id || "ANON" },
