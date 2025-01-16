@@ -1,4 +1,4 @@
-import { TagFilterType, TagType } from "./common";
+import { TagFilterType, TagType } from ".";
 
 export type GQLArgsType = { gateway: string } & BaseGQLArgsType;
 

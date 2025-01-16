@@ -9,7 +9,7 @@ import { getGQLData } from '@/shared/lib/gql-queries';
 import { Upload } from 'lucide-react';
 import { Progress } from './ui/progress';
 import { processId, GATEWAYS } from "@/shared/config/config";
-import { TagType, UploadVideosProps, Video } from '@/shared/types/common';
+import { TagType, UploadVideosProps, Video } from '@/shared/types';
 import { cleanProcessField, fileToBuffer } from '@/shared/utils/utils';
 import { useArweaveProvider } from '@/context/ArweaveProvider';
 

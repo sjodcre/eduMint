@@ -40,7 +40,8 @@ export default defineConfig({
   server: {
     proxy : {
       "/api": {
-      target: 'https://ans-stats.decent.land',
+      // target: 'https://ans-stats.decent.land',
+      target: 'https://cu45.ao-testnet.xyz',
       changeOrigin: true,
       rewrite: (path) => path.replace(/^\/api/, '')
     }}
@@ -49,5 +50,8 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  optimizeDeps: {
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
   },
 })

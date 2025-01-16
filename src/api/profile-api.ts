@@ -1,5 +1,5 @@
 import { processIdRegistry } from "@/shared/config/config";
-import { ProfileHeaderType, TagType } from "@/shared/types/common";
+import { ProfileHeaderType, TagType } from "@/shared/types";
 import { dryrun } from "@permaweb/aoconnect";
 
 // export async function getProfileByWalletAddress(args: { address: string }): Promise<ProfileHeaderType | null> {

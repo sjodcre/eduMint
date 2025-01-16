@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import VideoUploader from '../../components/VideoUploader';
+// import VideoUploader from '../../components/VideoUploader';
 import { useContext } from 'react';
 import { ScreenContext } from '@/context/ScreenContext';
+import VideoEditing from '@/components/VideoEditing';
 export default function Upload() {
  const [showVideoUploader, setShowVideoUploader] = useState(true);
  const {setCurrentScreen} = useContext(ScreenContext)
@@ -22,8 +23,8 @@ export default function Upload() {
     <div>
    {showVideoUploader && (
             <div className="mt-4 w-full">
-              <VideoUploader onUpload={handleUpload} />
-
+              {/* <VideoUploader onUpload={handleUpload} /> */}
+              <VideoEditing onUpload={handleUpload} />
             </div>
           )}
   </div>
