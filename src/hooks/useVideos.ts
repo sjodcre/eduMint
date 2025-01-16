@@ -77,13 +77,13 @@ export function useVideos() {
         // console.log("selecteduser from context: ", selectedUser);
         // const userDetails = await fetchPlayerProfile(walletAddress);
         // console.log("userDetails from fetchPlayerProfile: ", userDetails);
-        if (profile === null) {
-          // throw new Error("Failed to fetch user profile");
-          console.log("no profile yet");
-          return; 
-        }
+        // if (profile === null) {
+        //   // throw new Error("Failed to fetch user profile");
+        //   console.log("no profile yet");
+        //   return; 
+        // }
 
-        if (profile.version !== null) {
+        if (profile!==null && profile?.version !== null) {
           console.log("fetching videos with profile");
           const msgRes = await message({
             process: processId,

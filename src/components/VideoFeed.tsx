@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import { Heart, Bookmark, BadgeDollarSign } from "lucide-react";
-import { useVideos } from "../hooks/use-videos";
+import { Heart, Bookmark, BadgeDollarSign, Volume2, VolumeX} from "lucide-react";
+import { useVideos } from "../hooks/useVideos";
 import { Video, User } from "../shared/types/user";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { ScreenContext } from "@/context/ScreenContext";
@@ -330,6 +330,16 @@ function VideoCard({
   const arProvider = useArweaveProvider();
   // const { connected, connect } = useConnection();
 
+  const [isMuted, setIsMuted] = useState(true);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      const muted = !isMuted;
+      setIsMuted(muted);
+      videoRef.current.muted = muted;
+    }
+  };
+
   useEffect(() => {
     const options = {
       root: null,
@@ -410,13 +420,12 @@ function VideoCard({
         ref={videoRef}
         className="h-full w-full object-contain md:max-w-[400px] md:max-h-[calc(100vh-80px)]"
         loop
-        muted
+        muted={isMuted}
         playsInline
       >
         <source src={video.videoUrl} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-
       <div className="absolute bottom-32 left-4 right-4">
         <h2 className="text-white text-lg font-bold mb-1">{video.title}</h2>
         <p className="text-white text-sm mb-2">{video.description.split(' ').slice(0, 20).join(' ') + (video.description.split(' ').length > 20 ? '...' : '')}</p>
@@ -444,7 +453,18 @@ function VideoCard({
       </div>
 
       <div className="absolute bottom-20 right-4 flex flex-col items-center space-y-4">
-        <button></button>
+      <button
+          className="flex flex-col items-center text-white"
+          title={isMuted ? "Unmute" : "Mute"}
+          onClick={toggleMute}
+        >
+          {isMuted ? (
+            <VolumeX className="h-8 w-8" />
+          ) : (
+            <Volume2 className="h-8 w-8" />
+          )}
+          <span className="text-sm">{isMuted ? "Muted" : "Unmuted"}</span>
+        </button>
         <button className="flex flex-col items-center" title="Like" onClick={onLike}>
           <Heart
             className={`h-8 w-8 ${video.liked ? "fill-red-500 text-red-500" : "text-white"}`}

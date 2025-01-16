@@ -4,7 +4,7 @@ import React from "react";
 import arconnect from "../assets/arconnect.png";
 import othentImage from "../assets/othent.svg";
 import { User } from "@/shared/types/user";
-import { ProfileHeaderType } from "@/shared/types/common";
+import { ProfileHeaderType } from "@/shared/types";
 import { getProfileByWalletAddress } from "@/api/profile-api";
 import othent from "@/shared/lib/othent";
 
