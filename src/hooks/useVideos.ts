@@ -67,7 +67,8 @@ export function useVideos() {
     }));
   };
 
-  const fetchVideos = async () => {
+  // const fetchVideos = async () => {
+  const fetchVideos = async (): Promise<Video[]> => {
     try {
       setLoading(true);
       setError(null);
@@ -165,6 +166,8 @@ export function useVideos() {
       const errorMessage = err instanceof Error ? err.message : "Failed to fetch videos";
       console.error(errorMessage);
       setError(errorMessage);
+      return []; // Return an empty array on error
+
     } finally {
       setLoading(false);
     }

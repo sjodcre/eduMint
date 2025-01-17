@@ -195,7 +195,7 @@ export default function ProfilePage({
     );
   }
 
-  if (!selectedUser) {
+  if (selectedUser === null) {
     return (
       <div className="min-h-screen bg-zinc-900 text-white flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Create Your Profile</h1>
