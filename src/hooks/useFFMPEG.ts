@@ -102,7 +102,7 @@ export function useFFmpeg() {
         if (!loaded) throw new Error('Failed to load FFmpeg');
       }
   
-      setCompressing(true);
+    //   setCompressing(true);
       const ffmpeg = ffmpegRef.current;
       const { fetchFile } = await import('@ffmpeg/util');
   
@@ -117,7 +117,7 @@ export function useFFmpeg() {
       // Command to add watermark
       await ffmpeg.exec([
         '-i', inputFileName,
-        '-vf', `scale=640:-1,drawtext=fontfile=/${fontFileName}:text='${watermarkText}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=30:fontcolor=white@0.2`,
+        '-vf', `scale=1280:-1,drawtext=fontfile=/${fontFileName}:text='${watermarkText}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=30:fontcolor=white@0.2`,
         ...(isMuted ? ['-an'] : ['-c:a', 'copy']), // Remove audio if muted, otherwise copy it
         '-b:v', defaultSettings.videoBitrate,
         '-preset', 'ultrafast',
@@ -139,7 +139,7 @@ export function useFFmpeg() {
       setError(err instanceof Error ? err.message : 'An error occurred during watermarking');
       throw err;
     } finally {
-      setCompressing(false);
+    //   setCompressing(false);
     }
   };
 

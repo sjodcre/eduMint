@@ -40,7 +40,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [sections, setSections] = useState<{ start: number, end: number, fileName: string }[]>([]);
-  const [trimmedVideo, setTrimmedVideo] = useState<File | null>(null);
+  // const [trimmedVideo, setTrimmedVideo] = useState<File | null>(null);
 
   //watermark states
   const [watermarkText, setWatermarkText] = useState<string>("your nana");
@@ -95,7 +95,8 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       console.log("file", file);
       setVideoFile(file);
       setVideoSrc(blobURL);
-      setTrimmedVideo(null); // Reset trimmed video on new upload
+      setSections([]); // Reset sections when a new video is selected
+      // setTrimmedVideo(null); // Reset trimmed video on new upload
     }
   };
 
@@ -160,7 +161,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
   const uploadToArweave = async () => {
     // console.log("connected or not: ", connected);
 
-    let videoToUpload = trimmedVideo || videoFile;
+    let videoToUpload = videoFile;
 
     if (videoToUpload === null) {
       toast({
@@ -509,7 +510,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
     try {
       const { file, url } = await addWatermark(videoFile, watermarkText, isMuted);
       setVideoFile(file);
-      setTrimmedVideo(file);
+      // setTrimmedVideo(file);
       setVideoSrc(url);
       toast({ description: 'Watermark added successfully!' });
     } catch (error) {
@@ -529,8 +530,9 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
     try {
       const { file, url } = await trimVideo(videoFile, sections, isMuted);
       setVideoFile(file);
-      setTrimmedVideo(file);
+      // setTrimmedVideo(file);
       setVideoSrc(url);
+      setSections([]); // Reset sections after successful trim and merge
       toast({ description: 'Trimming and merging successful!' });
     } catch (error) {
       console.error('Error trimming video:', error);

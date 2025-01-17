@@ -65,8 +65,9 @@ export default function VideoFeed() {
     const handleScreenChange = async () => {
       if (window.location.hash === '#videofeed') {
         console.log("Home button pressed - refreshing videos");
-        await fetchVideos();
-        setLocalVideos(videos);
+        const updatedVideos = await fetchVideos();
+        // setLocalVideos(updatedVideos);
+        setLocalVideos(updatedVideos || []);
       }
     };
 

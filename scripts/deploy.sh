@@ -20,8 +20,8 @@ fi
 
 # Check if UNDERNAME is set if not set it as @
 if [ -z "$UNDERNAME" ]; then
-  UNDERNAME="edumint_pwa"
-  echo "UNDERNAME is not set. Setting it to edumint_pwa"
+  UNDERNAME="edumint"
+  echo "UNDERNAME is not set. Setting it to edumint"
 fi
 # echo $ANT
 #1. export DEPLOY_KEY=$(base64 -i ./.secrets/cookbook2.json)
