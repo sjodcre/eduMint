@@ -17,7 +17,7 @@ export default function ProfilePage({
 }) {
   // const { connected, connect: connectWallet } = useConnection();
   // const arProvider = useArweaveProvider();
-  const {selectedUser, profile, walletAddress, isProfileLoading} = useArweaveProvider()
+  const {selectedUser, profile, walletAddress, isProfileLoading, walletType, handleDisconnect} = useArweaveProvider()
   const [isLoading, setIsLoading] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("videos");
@@ -240,9 +240,23 @@ export default function ProfilePage({
             <h1 className="font-semibold">{selectedUser?.displayName}</h1>
             <p className="text-sm text-zinc-400">@{selectedUser?.username}</p>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-4">
             {/* user points */}
             <span className="text-sm">{100} points</span>
+            {walletAddress && (
+              <div className="flex items-center gap-4 text-white">
+                <p>
+                  {/* Connected to {walletType} wallet: */}
+                  <span className="font-bold"> {walletAddress.slice(0,3)}...{walletAddress.slice(-3)}</span>
+                </p>
+                <button
+                  onClick={handleDisconnect}
+                  className="px-4 py-2 bg-black text-white border border-white rounded-lg hover:bg-gray-900"
+                >
+                  Disconnect
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
