@@ -39,12 +39,12 @@ export default defineConfig({
     },
   })],
   server: {
-    host: '0.0.0.0', // Allow access from external devices
-    port: 5173,
-    https: {
-      key: fs.readFileSync('./key.pem'),
-      cert: fs.readFileSync('./cert.pem'),
-    },
+    // host: '0.0.0.0', // Allow access from external devices
+    // port: 5173,
+    // https: {
+    //   key: fs.readFileSync('./key.pem'),
+    //   cert: fs.readFileSync('./cert.pem'),
+    // },
     proxy : {
       "/api": {
       // target: 'https://ans-stats.decent.land',
