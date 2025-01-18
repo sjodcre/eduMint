@@ -1,4 +1,5 @@
 import path from "path"
+import fs from 'fs';
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -38,6 +39,12 @@ export default defineConfig({
     },
   })],
   server: {
+    host: '0.0.0.0', // Allow access from external devices
+    port: 5173,
+    https: {
+      key: fs.readFileSync('./key.pem'),
+      cert: fs.readFileSync('./cert.pem'),
+    },
     proxy : {
       "/api": {
       // target: 'https://ans-stats.decent.land',

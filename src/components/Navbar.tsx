@@ -50,7 +50,11 @@ export function BottomNav() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setCurrentScreen("videofeed")}
+        // onClick={() => setCurrentScreen("videofeed")}
+        onClick={() => {
+          setCurrentScreen("videofeed");
+          window.location.hash = "#videofeed";
+        }}
       >
         <Home className="text-white" size={24} />
         <span className="sr-only">Home</span>
@@ -58,7 +62,11 @@ export function BottomNav() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setCurrentScreen("upload")}
+        // onClick={() => setCurrentScreen("upload")}
+        onClick={() => {
+          setCurrentScreen("upload");
+          window.location.hash = "#upload";
+        }}
       >
         <Plus className="text-white" size={24} />
         <span className="sr-only">Recent</span>
@@ -66,7 +74,12 @@ export function BottomNav() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setCurrentScreen("market")}
+        // onClick={() => setCurrentScreen("market")}
+        onClick={() => {
+          setCurrentScreen("profile");
+          window.location.hash = "#profile";
+          console.log("profile button pressed");
+        }}
       >
         <DollarSign className="text-white" size={24} />
         <span className="sr-only">Earnings</span>

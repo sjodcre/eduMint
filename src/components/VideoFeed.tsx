@@ -61,28 +61,70 @@ export default function VideoFeed() {
     setLocalVideos(videos);
   }, [videos]);
 
+  // useEffect(() => {
+  //   const handleScreenChange = async () => {
+  //     if (window.location.hash === '#videofeed') {
+  //       console.log("Home button pressed - refreshing videos");
+  //       const updatedVideos = await fetchVideos();
+  //       // setLocalVideos(updatedVideos);
+  //       setLocalVideos(updatedVideos || []);
+  //     }
+  //   };
+
+  //   const handleVisibilityChange = () => {
+  //     if (!document.hidden) {
+  //       handleScreenChange();
+  //     }
+  //   };
+
+  //   // Add event listener for hash changes
+  //   window.addEventListener('hashchange', handleScreenChange);
+  //   document.addEventListener('visibilitychange', handleVisibilityChange);
+
+
+  //   // Initial check
+  //   handleScreenChange();
+
+  //   // Cleanup
+  //   return () => {
+  //     window.removeEventListener('hashchange', handleScreenChange);
+  //     document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+  //   };
+  // }, []);
+
   useEffect(() => {
     const handleScreenChange = async () => {
+      // Check if the hash matches '#videofeed'
       if (window.location.hash === '#videofeed') {
         console.log("Home button pressed - refreshing videos");
         const updatedVideos = await fetchVideos();
-        // setLocalVideos(updatedVideos);
         setLocalVideos(updatedVideos || []);
       }
     };
-
-    // Add event listener for hash changes
+  
+    const handleVisibilityChange = () => {
+      // When the app becomes visible again, check the hash
+      console.log("visibility change", document.hidden);
+      if (!document.hidden) {
+        handleScreenChange();
+      }
+    };
+  
+    // Add event listeners for hashchange and visibilitychange
     window.addEventListener('hashchange', handleScreenChange);
-
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+  
     // Initial check
     handleScreenChange();
-
+  
     // Cleanup
     return () => {
       window.removeEventListener('hashchange', handleScreenChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
-
+  
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const bottom =
       e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
