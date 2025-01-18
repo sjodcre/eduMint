@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { toBlobURL } from '@ffmpeg/util';
+import { toBlobURL, fetchFile } from '@ffmpeg/util';
 import type { ConversionSettings } from '../shared/types';
 
 export const defaultSettings: ConversionSettings = {
@@ -104,7 +104,7 @@ export function useFFmpeg() {
   
     //   setCompressing(true);
       const ffmpeg = ffmpegRef.current;
-      const { fetchFile } = await import('@ffmpeg/util');
+    //   const { fetchFile } = await import('@ffmpeg/util');
   
       const inputFileName = 'input' + file.name.substring(file.name.lastIndexOf('.'));
       const outputFileName = 'output-watermarked.mp4';
@@ -158,7 +158,7 @@ export function useFFmpeg() {
   
       setCompressing(true);
       const ffmpeg = ffmpegRef.current;
-      const { fetchFile } = await import('@ffmpeg/util');
+    //   const { fetchFile } = await import('@ffmpeg/util');
   
       const inputFileName = 'input' + file.name.substring(file.name.lastIndexOf('.'));
       const outputFileName = 'trimmed-output.mp4';
@@ -219,7 +219,7 @@ export function useFFmpeg() {
       setCompressing(true);
       setFileSizes({ original: file.size, converted: null });
       const ffmpeg = ffmpegRef.current;
-      const { fetchFile } = await import('@ffmpeg/util');
+    //   const { fetchFile } = await import('@ffmpeg/util');
       
       const inputFileName = 'input' + file.name.substring(file.name.lastIndexOf('.'));
       const outputFileName = 'output.mp4';
