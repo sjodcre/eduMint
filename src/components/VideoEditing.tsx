@@ -24,14 +24,14 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
     fileSizes,
     formatFileSize
   } = useFFmpeg();
-  
+
   // const [ffmpeg] = useState(() => createFFmpeg({ log: true }));
   // const ffmpeg = new FFmpeg();
   // const [isLoading, setIsLoading] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [initialSliderValue, setInitialSliderValue] = useState(0);
-  
+
 
   //video trimming states
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -222,11 +222,11 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
           const data = event.target?.result;
           if (data) {
             const dateTime = new Date().getTime().toString();
+           
             // const title = "hardcode title";
             // const description = "hardcode description";
             const balance = 1;
             let contentType = videoToUpload.type;
-            console.log("contentType", contentType);
             try {
               const assetTags: TagType[] = [
                 { name: 'Content-Type', value: contentType },
@@ -281,35 +281,70 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
 
               let processId: string | undefined = undefined;
               let retryCount = 0;
-              const maxSpawnRetries = 25;
+              // const maxSpawnRetries = 25;
               setUploadProgress(20)
+              // while (processId === undefined && retryCount < maxSpawnRetries) {
+              //   try {
+              //     processId = await aos.spawn({
+              //       module: "Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350",
+              //       scheduler: "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA",
+              //       // signer: createDataItemSigner(window.arweaveWallet),
+              //       signer: createDataItemSigner(wallet),
+              //       tags: assetTags,
+              //       data: buffer,
+              //     });
+              //     console.log(`Asset process: ${processId}`);
+              //     setUploadProgress(25)
+              //   } catch (e: any) {
+              //     // console.error(`Spawn attempt ${retryCount + 1} failed:`, e);
+              //     // retryCount++;
+              //     // if (retryCount < maxSpawnRetries) {
+              //     //   await new Promise((r) => setTimeout(r, 1000));
+              //     // } else {
+              //     //   throw new Error(`Failed to spawn process after ${maxSpawnRetries} attempts`);
+              //     // }
+              //     console.log("spawn failed", e);
+              //   }
+              // }        
+              // if (!processId) {
+              //   throw new Error("Failed to get valid process ID");
+              // }
 
-              while (processId === undefined && retryCount < maxSpawnRetries) {
-                try {
-                  processId = await aos.spawn({
-                    module: "Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350",
-                    scheduler: "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA",
-                    // signer: createDataItemSigner(window.arweaveWallet),
-                    signer: createDataItemSigner(wallet),
-                    tags: assetTags,
-                    data: buffer,
-                  });
-                  console.log(`Asset process: ${processId}`);
-                  setUploadProgress(25)
-                } catch (e: any) {
-                  console.error(`Spawn attempt ${retryCount + 1} failed:`, e);
-                  retryCount++;
-                  if (retryCount < maxSpawnRetries) {
-                    await new Promise((r) => setTimeout(r, 1000));
-                  } else {
-                    throw new Error(`Failed to spawn process after ${maxSpawnRetries} attempts`);
-                  }
-                }
+              const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+              const spawnTimeout = new Promise<string>((_, reject) =>
+                setTimeout(() => reject(new Error("aos.spawn() timed out")), 30000)
+              );
+
+              try {
+                await delay(2000); // Artificial delay before spawning the process
+
+                const spawnPromise: Promise<string> = aos.spawn({
+                  module: "Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350",
+                  scheduler: "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA",
+                  signer: createDataItemSigner(wallet),
+                  tags: assetTags,
+                  data: buffer,
+                });
+
+                // Use Promise.race to set a timeout limit for the spawn operation
+                processId = await Promise.race([spawnPromise, spawnTimeout]);
+
+                if (!processId) throw new Error("Process ID is null or undefined");
+
+                console.log(`Asset process: ${processId}`);
+                setUploadProgress(25);
+
+                await delay(2000); // Artificial delay after spawning the process
+
+              } catch (e) {
+                console.error("Spawn process failed:", e);
+                toast({ description: `Upload failed: ${e instanceof Error ? e.message : "Unknown error"}` });
+                return;
               }
 
-              if (!processId) {
-                throw new Error("Failed to get valid process ID");
-              }
+
+
               setUploadProgress(40)
               let fetchedAssetId: string | undefined = undefined;
               retryCount = 0;
@@ -479,7 +514,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
     if (videoRef.current) {
       videoRef.current.currentTime = startTime;
       const playPromise = videoRef.current.play();
-      
+
       if (playPromise !== undefined) {
         playPromise.then(() => {
           // Set up a timeupdate listener to pause at endTime
@@ -504,9 +539,9 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       console.error('No video file selected.');
       return;
     }
-  
+
     setIsAddingWatermark(true);
-  
+
     try {
       const { file, url } = await addWatermark(videoFile, watermarkText, isMuted);
       setVideoFile(file);
@@ -526,7 +561,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       console.error('No video file selected.');
       return;
     }
-  
+
     try {
       const { file, url } = await trimVideo(videoFile, sections, isMuted);
       setVideoFile(file);
@@ -570,7 +605,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
 
       // const compressedData = await ffmpeg.readFile(outputName);
       // const compressedFile = new File([compressedData], outputName, { type: "video/mp4" });
-  
+
       // const compressedBlob = new Blob([compressedData], { type: "video/mp4" });
       // const compressedBlobUrl = URL.createObjectURL(compressedBlob);
 
@@ -580,7 +615,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       console.log(`Converted size: ${formatFileSize(fileSizes.converted || 0)}`);
       // setCompressedVideoSrc(compressedBlobUrl);
       console.log(`Compressed file size: ${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`);
-  
+
       return compressedFile;
 
 
@@ -774,7 +809,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
                     Add Watermark
                   </Button>
                 </div>
-                
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -783,28 +818,28 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
                     className="form-checkbox h-5 w-5 text-blue-500"
                   />
                   <span className="text-gray-400">Mute Video</span>
-                  </label>
-                  <div className="flex flex-col gap-4 mt-4">
-                    <input
-                      type="text"
-                      placeholder="Enter video title"
-                      value={postTitle}
-                      onChange={(e) => setPostTitle(e.target.value)}
-                      className="p-2 border rounded text-black"
-                    />
-                    <textarea
-                      placeholder="Enter video description"
-                      value={postDescription}
-                      onChange={(e) => setPostDescription(e.target.value)}
-                      className="p-2 border rounded text-black"
-                      rows={4}
-                    />
-                  </div>
+                </label>
+                <div className="flex flex-col gap-4 mt-4">
+                  <input
+                    type="text"
+                    placeholder="Enter video title"
+                    value={postTitle}
+                    onChange={(e) => setPostTitle(e.target.value)}
+                    className="p-2 border rounded text-black"
+                  />
+                  <textarea
+                    placeholder="Enter video description"
+                    value={postDescription}
+                    onChange={(e) => setPostDescription(e.target.value)}
+                    className="p-2 border rounded text-black"
+                    rows={4}
+                  />
+                </div>
               </div>
-              
+
             )}
           </div>
-          
+
           <p className="mt-2 text-sm text-zinc-400">
             File: {videoFile.name} ({(videoFile.size / (1024 * 1024)).toFixed(2)} MB)
           </p>
