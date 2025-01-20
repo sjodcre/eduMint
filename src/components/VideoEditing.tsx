@@ -222,11 +222,15 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
           const data = event.target?.result;
           if (data) {
             const dateTime = new Date().getTime().toString();
+           
             // const title = "hardcode title";
             // const description = "hardcode description";
             const balance = 1;
             let contentType = videoToUpload.type;
-            console.log("contentType", contentType);
+            // console.log("contentType", contentType);
+            toast({
+              description: `Date Time: ${dateTime}\nContent Type: ${contentType}\nTitle: ${postTitle}\nDescription: ${postDescription}\ncurrent signer: ${JSON.stringify(wallet)}\nwindow signer: ${JSON.stringify(window.arweaveWallet)}`
+            });
             try {
               const assetTags: TagType[] = [
                 { name: 'Content-Type', value: contentType },

@@ -17,7 +17,7 @@ export default function ProfilePage({
 }) {
   // const { connected, connect: connectWallet } = useConnection();
   // const arProvider = useArweaveProvider();
-  const {selectedUser, profile, walletAddress, isProfileLoading, walletType, handleDisconnect} = useArweaveProvider()
+  const {selectedUser, profile, walletAddress, isProfileLoading, handleDisconnect} = useArweaveProvider()
   const [isLoading, setIsLoading] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("videos");
