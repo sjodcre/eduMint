@@ -13,7 +13,7 @@ export default function App() {
   const { currentScreen } = useContext(ScreenContext);
   const {selectedUser} = useArweaveProvider()
   return (
-    <div>
+    <div className="pb-16">
       {currentScreen === "onboarding" && <OnBoard />}
       {currentScreen === "videofeed" && <VideoFeed />}
       {currentScreen === "upload" && <Upload />}
