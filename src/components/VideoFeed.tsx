@@ -4,10 +4,10 @@ import { useVideos } from "../hooks/useVideos";
 import { Video, User } from "../shared/types/user";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { ScreenContext } from "@/context/ScreenContext";
-import { createDataItemSigner, message, result } from "@permaweb/aoconnect";
 import { processId } from "@/shared/config/config";
 import { transferAR } from "@/shared/lib/tip";
 import { toast } from "./ui/use-toast";
+import { fetchResultWithTimeout, sendMessageWithTimeout } from "@/shared/utils/aoUtils";
 // import { useConnection } from "@arweave-wallet-kit/react";
 
 export default function VideoFeed() {
@@ -141,23 +141,23 @@ export default function VideoFeed() {
     const updatedVideo = { ...video }; // Create a copy of the post to update
     if (!video.bookmarked) {
       try {
-        const res = await message({
-          process: processId,
-          tags: [
+        const res = await sendMessageWithTimeout(
+          processId,
+          [
             { name: "Action", value: "Save-Post" },
             { name: "PostID", value: video.autoId.toString() },
           ],
-          // signer: createDataItemSigner(window.arweaveWallet),
-          signer: createDataItemSigner(wallet),
-
-        });
+          wallet,
+          "",
+          30000
+        );
         console.log("Save Post result", res);
 
-        const saveResult = await result({
-          process: processId,
-          message: res,
-        });
-
+        const saveResult = await fetchResultWithTimeout(
+          processId,
+          res,
+          30000
+        );
         console.log("Post saved", saveResult);
         console.log(saveResult.Messages[0].Data);
 
@@ -180,21 +180,23 @@ export default function VideoFeed() {
     } else {
       // Handle removing bookmark case
       try {
-        const res = await message({
-          process: processId,
-          tags: [
+        const res = await sendMessageWithTimeout(
+          processId,
+          [
             { name: "Action", value: "Unsave-Post" },
             { name: "PostID", value: video.autoId.toString() },
           ],
-          // signer: createDataItemSigner(window.arweaveWallet),
-          signer: createDataItemSigner(wallet),
-        });
+          wallet,
+          "",
+          30000
+        );
         console.log("Unsave Post result", res);
 
-        const unsaveResult = await result({
-          process: processId,
-          message: res,
-        });
+        const unsaveResult = await fetchResultWithTimeout(
+          processId,
+          res,
+          30000
+        );
 
         console.log("Post unsaved", unsaveResult);
         console.log(unsaveResult.Messages[0].Data);
@@ -243,23 +245,24 @@ export default function VideoFeed() {
     const updatedVideo = { ...video }; // Create a copy of the post to update
 
     if (video.liked) {
-      const res = await message({
-        process: processId,
-        tags: [
+      const res = await sendMessageWithTimeout(
+        processId,
+        [
           { name: "Action", value: "Unlike-Post" },
           { name: "PostId", value: video.autoId.toString() },
         ],
-        // data: "",
-        // signer: createDataItemSigner(window.arweaveWallet),
-        signer: createDataItemSigner(wallet),
-      });
+        wallet,
+        "",
+        30000
+      );
 
-      console.log("Unlike Post result", result);
+      console.log("Unlike Post result", res);
 
-      const unlikeResult = await result({
-        process: processId,
-        message: res,
-      });
+      const unlikeResult = await fetchResultWithTimeout(
+        processId,
+        res,
+        30000
+      );
 
       console.log("Unlike successfully", unlikeResult);
       console.log(unlikeResult.Messages[0].Data);
@@ -272,23 +275,24 @@ export default function VideoFeed() {
         updatedVideo.likes = Math.max(0, updatedVideo.likes - 1);
       }
     } else {
-      const res = await message({
-        process: processId,
-        tags: [
+      const res = await sendMessageWithTimeout(
+        processId,
+        [
           { name: "Action", value: "Like-Post" },
           { name: "PostId", value: video.autoId.toString() },
         ],
-        // data: "",
-        // signer: createDataItemSigner(window.arweaveWallet),
-        signer: createDataItemSigner(wallet),
-      });
+        wallet,
+        "",
+        30000
+      );
 
-      console.log("Like Post result", result);
+      console.log("Like Post result", res);
 
-      const likeResult = await result({
-        process: processId,
-        message: res,
-      });
+      const likeResult = await fetchResultWithTimeout(
+        processId,
+        res,
+        30000
+      );
 
       console.log("Like successfully", likeResult);
       console.log(likeResult.Messages[0].Data);

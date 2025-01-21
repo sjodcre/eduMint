@@ -4,13 +4,13 @@ import "nouislider/distribute/nouislider.css";
 import { Button } from './ui/button';
 import { toast } from './ui/use-toast';
 import { processId, GATEWAYS } from "@/shared/config/config";
-import { connect as aoConnect, createDataItemSigner, message, result } from '@permaweb/aoconnect';
 import { useArweaveProvider } from '@/context/ArweaveProvider';
 import { TagType, UploadVideosProps } from '@/shared/types';
 import { cleanProcessField, fileToBuffer } from '@/shared/utils/utils';
 import { getGQLData } from '@/shared/lib/gql-queries';
 import { Progress } from './ui/progress';
 import { defaultSettings, useFFmpeg } from '@/hooks/useFFMPEG';
+import { fetchResultWithTimeout, sendMessageWithTimeout, spawnProcessWithTimeout } from '@/shared/utils/aoUtils';
 
 // const ffmpeg = createFFmpeg({ log: true });
 
@@ -119,28 +119,22 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       description: "Storing on AO...",
     });
     try {
-      // console.log("postTitle: ", title);
-      // console.log("postDescription: ", description);
-      const res = await message({
-        process: processId,
-        tags: [
+      const res = await sendMessageWithTimeout(
+        processId,
+        [
           { name: "Action", value: "Create-Post" },
           { name: "VideoTxId", value: videoTxId },
           { name: "Title", value: title || "Untitled" },
-          // { name: "Name", value: arProvider.profile.username || "ANON" },
           { name: "Name", value: "ANON" },
-          // { name: "MediaType", value: mediaType.toString() || "video"}, // Add this tag
         ],
-        data: description || "No description",
-        // signer: createDataItemSigner(window.arweaveWallet),
-        signer: createDataItemSigner(wallet),
+        wallet,
+        description || "No description"
+      );
 
-      });
-
-      const createResult = await result({
-        process: processId,
-        message: res,
-      });
+      const createResult = await fetchResultWithTimeout(
+        processId,
+        res
+      );
 
       console.log("Created successfully", createResult);
       console.log(createResult.Messages[0].Data);
@@ -195,7 +189,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
 
 
     // setUploadProgress(1)
-    const aos = aoConnect();
+    // const aos = connect();
 
     try {
       // Compress the video before upload
@@ -310,32 +304,13 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
               //   throw new Error("Failed to get valid process ID");
               // }
 
-              const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-              const spawnTimeout = new Promise<string>((_, reject) =>
-                setTimeout(() => reject(new Error("aos.spawn() timed out")), 30000)
-              );
-
               try {
-                await delay(2000); // Artificial delay before spawning the process
-
-                const spawnPromise: Promise<string> = aos.spawn({
-                  module: "Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350",
-                  scheduler: "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA",
-                  signer: createDataItemSigner(wallet),
-                  tags: assetTags,
-                  data: buffer,
-                });
-
-                // Use Promise.race to set a timeout limit for the spawn operation
-                processId = await Promise.race([spawnPromise, spawnTimeout]);
-
+                processId = await spawnProcessWithTimeout(wallet, assetTags, buffer);
+               
                 if (!processId) throw new Error("Process ID is null or undefined");
 
                 console.log(`Asset process: ${processId}`);
                 setUploadProgress(25);
-
-                await delay(2000); // Artificial delay after spawning the process
 
               } catch (e) {
                 console.error("Spawn process failed:", e);
@@ -375,32 +350,29 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
               }
 
               if (fetchedAssetId) {
-                const evalMessage = await aos.message({
-                  process: processId,
-                  // signer: createDataItemSigner(window.arweaveWallet),
-                  signer: createDataItemSigner(wallet),
-                  tags: [{ name: 'Action', value: 'Eval' }],
-                  data: processSrc || "",
-                });
+                const evalMessage = await sendMessageWithTimeout(
+                  processId,
+                  [{ name: 'Action', value: 'Eval' }],
+                  wallet,
+                  processSrc || ""
+                );
 
-                const evalResult = await aos.result({
-                  message: evalMessage,
-                  process: processId,
-                });
+                const evalResult = await fetchResultWithTimeout(
+                  processId,
+                  evalMessage
+                );
 
                 if (evalResult) {
-                  await aos.message({
-                    process: processId,
-                    // signer: createDataItemSigner(window.arweaveWallet),
-                    signer: createDataItemSigner(wallet),
-                    tags: [
+                  await sendMessageWithTimeout(
+                    processId,
+                    [
                       { name: 'Action', value: 'Add-Asset-To-Profile' },
-                      // { name: 'ProfileProcess', value: arProvider?.profile?.id || "ANON" },
                       { name: 'ProfileProcess', value: "ANON" },
                       { name: 'Quantity', value: balance.toString() },
                     ],
-                    data: JSON.stringify({ Id: processId, Quantity: balance }),
-                  });
+                    wallet,
+                    JSON.stringify({ Id: processId, Quantity: balance })
+                  );
                   videoTxIds.push({ txid: processId, path: "0", type: videoToUpload.type });
                   resolve();
                 }

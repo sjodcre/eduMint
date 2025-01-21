@@ -1,13 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@/shared/types/user";
-import { dryrun } from "@permaweb/aoconnect";
 // import { useConnection } from "@arweave-wallet-kit/react";
 import { useState, useEffect } from "react";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { processId } from "@/shared/config/config";
 // import { fetchUserProfile } from "@/shared/lib/profile-queries";
 import WalletConnection from "@/components/WalletConnect";
+import { dryrunWithTimeout } from "@/shared/utils/aoUtils";
 
 //@ts-ignore
 export default function ProfilePage({
@@ -91,15 +91,16 @@ export default function ProfilePage({
     // const userAddress = await window.arweaveWallet.getActiveAddress()
     setIsLoading(true);
     try {
-      const response = await dryrun({
-        process: processId,
-        tags: [
+      const response = await dryrunWithTimeout(
+        processId, 
+        [
           { name: "Action", value: "Get-Bookmarked-Posts" },
-          // { name: "Author-Id", value: userAddress },
-          { name: "Author-Id", value: walletAddress },
-        ],
-      });
-      const parsedPosts = response.Messages.map((msg) => {
+          { name: "Author-Id", value: walletAddress }
+        ], 
+        null, 
+        30000
+      );
+      const parsedPosts = response.Messages.map((msg: any) => {
         const parsedData = JSON.parse(msg.Data);
         //   return parsedData;
         console.log("parsedPosts before mapping: ", parsedData);
@@ -127,18 +128,19 @@ export default function ProfilePage({
     // const userAddress = await window.arweaveWallet.getActiveAddress()
     setIsLoading(true);
     try {
-      const response = await dryrun({
-        process: processId,
-        tags: [
+      const response = await dryrunWithTimeout(
+        processId, 
+        [
           { name: "Action", value: "List-User-Posts" },
-          // { name: "Author-Id", value: userAddress },
-          { name: "Author-Id", value: walletAddress },
-        ],
-      });
+          { name: "Author-Id", value: walletAddress }
+        ], 
+        null, 
+        30000
+      );
 
       console.log("response from list-user-posts", response);
 
-      const parsedPosts = response.Messages.map((msg) => {
+      const parsedPosts = response.Messages.map((msg: any) => {
         const parsedData = JSON.parse(msg.Data);
         return parsedData.map((post: any) => ({
           ...post,

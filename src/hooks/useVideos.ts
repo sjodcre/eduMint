@@ -1,13 +1,8 @@
 import { useState, useEffect } from "react";
 import type { Video } from "@/shared/types/user";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
-import {
-  createDataItemSigner,
-  dryrun,
-  message,
-  result,
-} from "@permaweb/aoconnect";
 import { processId } from "@/shared/config/config";
+import { dryrunWithTimeout, fetchResultWithTimeout, sendMessageWithTimeout } from "@/shared/utils/aoUtils";
 // import { useConnection } from "@arweave-wallet-kit/react";
 
 const MAX_RETRIES = 3;
@@ -86,19 +81,22 @@ export function useVideos() {
 
         if (profile!==null && profile?.version !== null) {
           console.log("fetching videos with profile");
-          const msgRes = await message({
-            process: processId,
-            tags: [
+          const msgRes = await sendMessageWithTimeout(
+            processId,
+            [
               { name: "Action", value: "List-Posts-Likes" },
               { name: "Author-Id", value: profile.walletAddress },
             ],
-            signer: createDataItemSigner(wallet),
-          });
+            wallet,
+            "",
+            30000
+          );
 
-          const postResult = await result({
-            process: processId,
-            message: msgRes,
-          });
+          const postResult = await fetchResultWithTimeout(
+            processId,
+            msgRes,
+            25000
+          );
           console.log("postResult at use-videos: ", postResult);
 
           const parsedPosts = postResult.Messages.map((msg: any) => {
@@ -118,10 +116,17 @@ export function useVideos() {
 
         } else {
           console.log("fetching videos without profile");
-          const response = await dryrun({
-            process: processId,
-            tags: [{ name: "Action", value: "List-Posts" }],
-          });
+          const response = await dryrunWithTimeout(
+            processId, 
+            [{ name: "Action", value: "List-Posts" }], 
+            null, 
+            30000
+          );
+
+          if (!response || !response.Messages) {
+            console.error("Invalid response received from dryrunWithTimeout", response);
+            throw new Error("Failed to fetch posts, please try again.");
+          }
 
           const parsedPosts = response.Messages.map((msg: any) => {
             const parsedData = JSON.parse(msg.Data);
@@ -141,10 +146,17 @@ export function useVideos() {
 
       } else {
         console.log("fetching videos without wallet connection");
-        const response = await dryrun({
-          process: processId,
-          tags: [{ name: "Action", value: "List-Posts" }],
-        });
+        const response = await dryrunWithTimeout(
+          processId, 
+          [{ name: "Action", value: "List-Posts" }], 
+          null, 
+          30000
+        );
+
+        if (!response || !response.Messages) {
+          console.error("Invalid response received from dryrunWithTimeout", response);
+          throw new Error("Failed to fetch posts, please try again.");
+        }
 
         const parsedPosts = response.Messages.map((msg: any) => {
           const parsedData = JSON.parse(msg.Data);
