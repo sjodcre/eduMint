@@ -1,217 +1,618 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/components/ui/use-toast"
-import { BookOpen, GraduationCap, Coins, Heart, School, Star } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox"
+import { MarketVideoCard } from "@/components/MarketVideoCard"
+import { ArrowUpDown, Filter, Search, ChevronLeft, ChevronRight } from "lucide-react"
 
-interface Course {
+interface Video {
   id: string
   title: string
-  instructor: {
-    name: string
-    avatar: string
+  user: {
+    id: string
+    username: string
+    profileImage: string
   }
-  thumbnail: string
-  price: number
+  videoUrl: string
+  price: number | null
   category: string
-  level: string
-  rating: number
+  likes: number
+  liked: boolean
+  bookmarks: number
+  bookmarked: boolean
+  listedForSaleAt: Date | null
 }
 
-const courses: Course[] = [
-  {
-    id: '1',
-    title: 'Quantum Physics',
-    instructor: { name: 'Dr. Quantum', avatar: 'https://images.unsplash.com/photo-1732928352958-6a5457878319?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGZwfGVufDB8fDB8fHww' },
-    thumbnail: 'https://plus.unsplash.com/premium_photo-1700942979302-72ef87e43525?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8UXVhbnR1bXxlbnwwfHwwfHx8MA%3D%3D',
-    price: 5,
-    category: 'Physics',
-    level: '',
-    rating: 4.8
-  },
-  {
-    id: '2',
-    title: 'World History',
-    instructor: { name: 'Prof. Historian', avatar: 'https://source.unsplash.com/random/100x100?professor' },
-    thumbnail: 'https://plus.unsplash.com/premium_photo-1693256457845-0585380de3c9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YW5jaWVudCUyMHJ1aW5zfGVufDB8fDB8fHww',
-    price: 4,
-    category: 'History',
-    level: 'Intermediate',
-    rating: 4.6
-  },
-  {
-    id: '3',
-    title: 'Creative Writing',
-    instructor: { name: 'Author Extraordinaire', avatar: 'https://source.unsplash.com/random/100x100?writer' },
-    thumbnail: 'https://plus.unsplash.com/premium_photo-1664811569218-0402a31e1e07?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGNyZWF0aXZlJTIwd3JpdGluZ3xlbnwwfHwwfHx8MA%3D%3D',
-    price: 3,
-    category: 'Literature',
-    level: 'Beginner',
-    rating: 4.9
-  },
-  {
-    id: '4',
-    title: 'Advanced Calculus and Real Analysis',
-    instructor: { name: 'Dr. Mathgenius', avatar: 'https://source.unsplash.com/random/100x100?mathematician' },
-    thumbnail: 'https://plus.unsplash.com/premium_photo-1724266846347-bd10efdd330e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    price: 6,
-    category: 'Mathematics',
-    level: 'Advanced',
-    rating: 4.7
-  },
-  {
-    id: '5',
-    title: 'Environmental Science: Climate Change',
-    instructor: { name: 'Dr. Eco', avatar: '' },
-    thumbnail: 'https://images.unsplash.com/photo-1518152006812-edab29b069ac?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    price: 4.5,
-    category: 'Environmental Science',
-    level: 'Intermediate',
-    rating: 4.8
-  },
-]
+const fetchUserVideos = (): Video[] => {
+  return [
+    {
+      id: "1",
+      title: "Introduction to React",
+      user: { id: "user1", username: "reactmaster", profileImage: "/placeholder-avatar.jpg" },
+      videoUrl: "https://example.com/video1.mp4",
+      price: null,
+      category: "Programming",
+      likes: 100,
+      liked: false,
+      bookmarks: 50,
+      bookmarked: false,
+      listedForSaleAt: null,
+    },
+    {
+      id: "2",
+      title: "Advanced TypeScript Techniques",
+      user: { id: "user1", username: "reactmaster", profileImage: "/placeholder-avatar.jpg" },
+      videoUrl: "https://example.com/video2.mp4",
+      price: 5,
+      category: "Programming",
+      likes: 75,
+      liked: false,
+      bookmarks: 30,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+    },
+    {
+      id: "3",
+      title: "Building RESTful APIs",
+      user: { id: "user1", username: "reactmaster", profileImage: "/placeholder-avatar.jpg" },
+      videoUrl: "https://example.com/video3.mp4",
+      price: null,
+      category: "Backend",
+      likes: 120,
+      liked: false,
+      bookmarks: 40,
+      bookmarked: false,
+      listedForSaleAt: null,
+    },
+    {
+      id: "4",
+      title: "CSS Grid Mastery",
+      user: { id: "user1", username: "reactmaster", profileImage: "/placeholder-avatar.jpg" },
+      videoUrl: "https://example.com/video4.mp4",
+      price: 3,
+      category: "Frontend",
+      likes: 90,
+      liked: false,
+      bookmarks: 25,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+    },
+    {
+      id: "5",
+      title: "JavaScript Design Patterns",
+      user: { id: "user1", username: "reactmaster", profileImage: "/placeholder-avatar.jpg" },
+      videoUrl: "https://example.com/video5.mp4",
+      price: null,
+      category: "Programming",
+      likes: 150,
+      liked: false,
+      bookmarks: 60,
+      bookmarked: false,
+      listedForSaleAt: null,
+    },
+    {
+      id: "6",
+      title: "Vue.js for Beginners",
+      user: { id: "user1", username: "reactmaster", profileImage: "/placeholder-avatar.jpg" },
+      videoUrl: "https://example.com/video6.mp4",
+      price: 4,
+      category: "Frontend",
+      likes: 80,
+      liked: false,
+      bookmarks: 20,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+    },
+  ]
+}
 
-const featuredCourse = courses[0]
-const trendingSubjects = ['Physics', 'History', 'Literature', 'Mathematics', 'Environmental Science']
-const educatorSpotlight = {
-  name: 'Dr. Innovator',
-  avatar: 'https://images.unsplash.com/photo-1732928352958-6a5457878319?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGZwfGVufDB8fDB8fHww',
-  description: 'Pioneering interactive online education with cutting-edge teaching methods!',
-  students: 50000
+const fetchVideosForSale = (): Video[] => {
+  return [
+    {
+      id: "7",
+      title: "Machine Learning Basics",
+      user: { id: "user2", username: "aiexpert", profileImage: "/placeholder-avatar2.jpg" },
+      videoUrl: "https://example.com/video7.mp4",
+      price: 10,
+      category: "Data Science",
+      likes: 200,
+      liked: false,
+      bookmarks: 80,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
+    },
+    {
+      id: "8",
+      title: "Web Design Principles",
+      user: { id: "user3", username: "designguru", profileImage: "/placeholder-avatar3.jpg" },
+      videoUrl: "https://example.com/video8.mp4",
+      price: 7.5,
+      category: "Design",
+      likes: 150,
+      liked: false,
+      bookmarks: 60,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+    },
+    {
+      id: "9",
+      title: "iOS App Development",
+      user: { id: "user4", username: "swiftcoder", profileImage: "/placeholder-avatar4.jpg" },
+      videoUrl: "https://example.com/video9.mp4",
+      price: 12,
+      category: "Mobile Development",
+      likes: 180,
+      liked: false,
+      bookmarks: 70,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    },
+    {
+      id: "10",
+      title: "Python for Data Analysis",
+      user: { id: "user5", username: "datawizard", profileImage: "/placeholder-avatar5.jpg" },
+      videoUrl: "https://example.com/video10.mp4",
+      price: 8,
+      category: "Data Science",
+      likes: 220,
+      liked: false,
+      bookmarks: 90,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+    },
+    {
+      id: "11",
+      title: "Blockchain Fundamentals",
+      user: { id: "user6", username: "cryptodev", profileImage: "/placeholder-avatar6.jpg" },
+      videoUrl: "https://example.com/video11.mp4",
+      price: 15,
+      category: "Blockchain",
+      likes: 130,
+      liked: false,
+      bookmarks: 50,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+    },
+    {
+      id: "12",
+      title: "UX Research Methods",
+      user: { id: "user7", username: "uxpro", profileImage: "/placeholder-avatar7.jpg" },
+      videoUrl: "https://example.com/video12.mp4",
+      price: 9,
+      category: "Design",
+      likes: 170,
+      liked: false,
+      bookmarks: 75,
+      bookmarked: false,
+      listedForSaleAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
+    },
+  ]
+}
+
+type SortOption = "recent" | "alphabetical" | "likes" | "bookmarks"
+
+interface FilterOptions {
+  withinDays: boolean
+  priceMoreThan: boolean
+  priceLessThan: boolean
+  likesMoreThan: boolean
+  likesLessThan: boolean
 }
 
 export function Market() {
-  const [wishlist, setWishlist] = useState<string[]>([])
+  const [userVideos, setUserVideos] = useState<Video[]>([])
+  const [videosForSale, setVideosForSale] = useState<Video[]>([])
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [isListingDialogOpen, setIsListingDialogOpen] = useState(false)
+  const [listingPrice, setListingPrice] = useState("")
+  const [activeTab, setActiveTab] = useState("user-videos")
+  const [sortOption, setSortOption] = useState<SortOption>("recent")
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    withinDays: false,
+    priceMoreThan: false,
+    priceLessThan: false,
+    likesMoreThan: false,
+    likesLessThan: false,
+  })
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(3)
   const { toast } = useToast()
 
-  const toggleWishlist = (courseId: string) => {
-    setWishlist(prev => 
-      prev.includes(courseId) 
-        ? prev.filter(id => id !== courseId)
-        : [...prev, courseId]
-    )
+  useEffect(() => {
+    setUserVideos(fetchUserVideos())
+    setVideosForSale(fetchVideosForSale())
+  }, [])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeTab, searchQuery, sortOption, filterOptions])
+
+  const handleListForSale = (video: Video) => {
+    setSelectedVideo(video)
+    setIsListingDialogOpen(true)
   }
 
-  const handleEnrollment = (course: Course) => {
+  const handleCancelSale = (videoId: string) => {
+    setUserVideos((prevVideos) =>
+      prevVideos.map((video) => (video.id === videoId ? { ...video, price: null, listedForSaleAt: null } : video)),
+    )
     toast({
-      title: "Enrollment Successful!",
-      description: `You've enrolled in "${course.title}" (${course.level}) for ${course.price} AR. Happy learning!`,
+      title: "Sale Cancelled",
+      description: "Your video has been removed from the marketplace.",
     })
+  }
+
+  const handleConfirmListing = () => {
+    if (selectedVideo && listingPrice) {
+      const price = Number.parseFloat(listingPrice)
+      if (isNaN(price) || price <= 0) {
+        toast({
+          title: "Invalid Price",
+          description: "Please enter a valid price (up to 4 decimal places).",
+          variant: "destructive",
+        })
+        return
+      }
+      setUserVideos((prevVideos) =>
+        prevVideos.map((video) =>
+          video.id === selectedVideo.id ? { ...video, price, listedForSaleAt: new Date() } : video,
+        ),
+      )
+      setIsListingDialogOpen(false)
+      setListingPrice("")
+      toast({
+        title: "Video Listed",
+        description: `Your video is now listed for sale at ${price} AR.`,
+      })
+    }
+  }
+
+  const handleBuyVideo = (video: Video) => {
+    setVideosForSale((prevVideos) => prevVideos.filter((v) => v.id !== video.id))
+    setUserVideos((prevVideos) => [...prevVideos, { ...video, price: null, listedForSaleAt: null }])
+    toast({
+      title: "Purchase Successful",
+      description: `You have bought "${video.title}" for ${video.price} AR.`,
+    })
+  }
+
+  const handleLikeVideo = (videoId: string, isUserVideo: boolean) => {
+    const updateVideos = (videos: Video[]) =>
+      videos.map((video) =>
+        video.id === videoId
+          ? { ...video, liked: !video.liked, likes: video.liked ? video.likes - 1 : video.likes + 1 }
+          : video,
+      )
+
+    if (isUserVideo) {
+      setUserVideos(updateVideos)
+    } else {
+      setVideosForSale(updateVideos)
+    }
+  }
+
+  const handleBookmarkVideo = (videoId: string, isUserVideo: boolean) => {
+    const updateVideos = (videos: Video[]) =>
+      videos.map((video) =>
+        video.id === videoId
+          ? {
+              ...video,
+              bookmarked: !video.bookmarked,
+              bookmarks: video.bookmarked ? video.bookmarks - 1 : video.bookmarks + 1,
+            }
+          : video,
+      )
+
+    if (isUserVideo) {
+      setUserVideos(updateVideos)
+    } else {
+      setVideosForSale(updateVideos)
+    }
+  }
+
+  const sortVideos = (videos: Video[]): Video[] => {
+    switch (sortOption) {
+      case "recent":
+        return [...videos].sort((a, b) => {
+          if (!a.listedForSaleAt && !b.listedForSaleAt) return 0
+          if (!a.listedForSaleAt) return 1
+          if (!b.listedForSaleAt) return -1
+          return b.listedForSaleAt.getTime() - a.listedForSaleAt.getTime()
+        })
+      case "alphabetical":
+        return [...videos].sort((a, b) => a.title.localeCompare(b.title))
+      case "likes":
+        return [...videos].sort((a, b) => b.likes - a.likes)
+      case "bookmarks":
+        return [...videos].sort((a, b) => b.bookmarks - a.bookmarks)
+      default:
+        return videos
+    }
+  }
+
+  const filterVideos = (videos: Video[]): Video[] => {
+    return videos.filter((video) => {
+      if (filterOptions.withinDays) {
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        if (!video.listedForSaleAt || video.listedForSaleAt < sevenDaysAgo) {
+          return false
+        }
+      }
+      if (filterOptions.priceMoreThan && video.price !== null && video.price <= 10) {
+        return false
+      }
+      if (filterOptions.priceLessThan && video.price !== null && video.price >= 50) {
+        return false
+      }
+      if (filterOptions.likesMoreThan && video.likes <= 100) {
+        return false
+      }
+      if (filterOptions.likesLessThan && video.likes >= 150) {
+        return false
+      }
+      return true
+    })
+  }
+
+  const searchVideos = (videos: Video[]): Video[] => {
+    if (!searchQuery) return videos
+    const lowercaseQuery = searchQuery.toLowerCase()
+    return videos.filter((video) => video.title.toLowerCase().includes(lowercaseQuery))
+  }
+
+  const paginateVideos = (videos: Video[]): Video[] => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return videos.slice(startIndex, startIndex + itemsPerPage)
+  }
+
+  const renderVideoGrid = (videos: Video[], isUserVideos: boolean) => {
+    const processedVideos = sortVideos(searchVideos(filterVideos(videos)))
+    const totalPages = Math.ceil(processedVideos.length / itemsPerPage)
+    const paginatedVideos = paginateVideos(processedVideos)
+
+    return (
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedVideos.map((video) => (
+            <MarketVideoCard
+              key={video.id}
+              video={video}
+              isUserVideo={isUserVideos}
+              onListForSale={handleListForSale}
+              onCancelSale={handleCancelSale}
+              onBuyVideo={handleBuyVideo}
+              onLike={(videoId) => handleLikeVideo(videoId, isUserVideos)}
+              onBookmark={(videoId) => handleBookmarkVideo(videoId, isUserVideos)}
+            />
+          ))}
+        </div>
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center mt-8 space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="bg-zinc-700 text-white hover:bg-zinc-600"
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Previous
+            </Button>
+            <div className="flex items-center space-x-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className={
+                    currentPage === page ? "bg-zinc-500 text-white" : "bg-zinc-700 text-white hover:bg-zinc-600"
+                  }
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="bg-zinc-700 text-white hover:bg-zinc-600"
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        )}
+      </>
+    )
   }
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white p-4 md:p-8">
-      <h1 className="text-3xl font-bold mb-8">Marketplace</h1>
+      <h1 className="text-3xl font-bold mb-8">Video Marketplace</h1>
 
-      {/* Featured Course */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Featured Videos</h2>
-        <div className="relative rounded-lg overflow-hidden">
-          <img src={featuredCourse.thumbnail} alt={featuredCourse.title} className="w-full h-64 object-cover" />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-            <h3 className="text-xl font-bold">{featuredCourse.title}</h3>
-            <p className="text-sm text-zinc-300">By {featuredCourse.instructor.name} • {featuredCourse.level}</p>
-            <Button 
-              className="mt-2" 
-              onClick={() => handleEnrollment(featuredCourse)}
-            >
-              Buy now for {featuredCourse.price} AR
-            </Button>
-          </div>
+      <div className="mb-4 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+        <div className="relative flex-grow">
+          <Input
+            type="text"
+            placeholder="Search videos..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-zinc-800 text-white border-zinc-700 focus:border-zinc-500"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" />
         </div>
-      </section>
+        <div className="flex space-x-4">
+          <Select defaultValue="recent" onValueChange={(value) => setSortOption(value as SortOption)}>
+            <SelectTrigger className="w-[180px] bg-zinc-800 text-white">
+              <ArrowUpDown className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent className="bg-zinc-800 text-white">
+              <SelectItem value="recent" className="hover:bg-zinc-600 focus:bg-zinc-600 focus:text-white">
+                Most Recent
+              </SelectItem>
+              <SelectItem value="alphabetical" className="hover:bg-zinc-600 focus:bg-zinc-600 focus:text-white">
+                Alphabetical
+              </SelectItem>
+              <SelectItem value="likes" className="hover:bg-zinc-600 focus:bg-zinc-600 focus:text-white">
+                Most Likes
+              </SelectItem>
+              <SelectItem value="bookmarks" className="hover:bg-zinc-600 focus:bg-zinc-600 focus:text-white">
+                Most Bookmarks
+              </SelectItem>
+            </SelectContent>
+          </Select>
 
-      {/* Trending Subjects */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Trending</h2>
-        <div className="flex flex-wrap gap-2">
-          {trendingSubjects.map(subject => (
-            <Badge key={subject} variant="secondary" className="text-sm">
-              <BookOpen className="w-4 h-4 mr-1" />
-              {subject}
-            </Badge>
-          ))}
-        </div>
-      </section>
-
-      {/* Educator Spotlight */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Educator Spotlight</h2>
-        <div className="bg-zinc-800 rounded-lg p-4 flex items-center">
-          <Avatar className="w-16 h-16 mr-4">
-            <AvatarImage src={educatorSpotlight.avatar} alt={educatorSpotlight.name} />
-            <AvatarFallback>{educatorSpotlight.name[0]}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="text-xl font-bold">{educatorSpotlight.name}</h3>
-            <p className="text-sm text-zinc-300 mb-2">{educatorSpotlight.description}</p>
-            <p className="text-sm">
-              <GraduationCap className="inline w-4 h-4 mr-1" />
-              {educatorSpotlight.students.toLocaleString()} students
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Course Grid */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4">Explore Courses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map(course => (
-            <motion.div 
-              key={course.id} 
-              className="bg-zinc-800 rounded-lg overflow-hidden"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <img src={course.thumbnail} alt={course.title} className="w-full h-48 object-cover" />
-              <div className="p-4">
-                <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
-                <div className="flex items-center mb-2">
-                  <Avatar className="w-6 h-6 mr-2">
-                    <AvatarImage src={course.instructor.avatar} alt={course.instructor.name} />
-                    <AvatarFallback>{course.instructor.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm text-zinc-300">{course.instructor.name}</span>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="bg-zinc-800 text-white hover:bg-zinc-600 hover:text-white">
+                <Filter className="mr-2 h-4 w-4" />
+                Filter
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 bg-zinc-800 text-white border-zinc-700">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">Filter Options</h4>
+                  <p className="text-sm text-zinc-400">Select the filters you want to apply.</p>
                 </div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-zinc-400">{course.level}</span>
-                  <span className="text-sm text-zinc-400 flex items-center">
-                    <Star className="w-4 h-4 mr-1 text-yellow-400" />
-                    {course.rating}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold">
-                    <Coins className="inline w-5 h-5 mr-1" />
-                    {course.price} AR
-                  </span>
-                  <div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="mr-2"
-                      onClick={() => toggleWishlist(course.id)}
-                    >
-                      <Heart className={`w-5 h-5 ${wishlist.includes(course.id) ? 'text-red-500 fill-red-500' : ''}`} />
-                      <span className="sr-only">Add to wishlist</span>
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleEnrollment(course)}
-                    >
-                      <School className="w-4 h-4 mr-2" />
-                      Enroll
-                    </Button>
+                <div className="grid gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="within-7-days"
+                      checked={filterOptions.withinDays}
+                      onCheckedChange={(checked) =>
+                        setFilterOptions({ ...filterOptions, withinDays: checked as boolean })
+                      }
+                    />
+                    <label htmlFor="within-7-days">Within 7 days</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="price-more-than"
+                      checked={filterOptions.priceMoreThan}
+                      onCheckedChange={(checked) =>
+                        setFilterOptions({ ...filterOptions, priceMoreThan: checked as boolean })
+                      }
+                    />
+                    <label htmlFor="price-more-than">Price more than 10 AR</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="price-less-than"
+                      checked={filterOptions.priceLessThan}
+                      onCheckedChange={(checked) =>
+                        setFilterOptions({ ...filterOptions, priceLessThan: checked as boolean })
+                      }
+                    />
+                    <label htmlFor="price-less-than">Price less than 50 AR</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="likes-more-than"
+                      checked={filterOptions.likesMoreThan}
+                      onCheckedChange={(checked) =>
+                        setFilterOptions({ ...filterOptions, likesMoreThan: checked as boolean })
+                      }
+                    />
+                    <label htmlFor="likes-more-than">Likes more than 100</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="likes-less-than"
+                      checked={filterOptions.likesLessThan}
+                      onCheckedChange={(checked) =>
+                        setFilterOptions({ ...filterOptions, likesLessThan: checked as boolean })
+                      }
+                    />
+                    <label htmlFor="likes-less-than">Likes less than 150</label>
                   </div>
                 </div>
               </div>
-            </motion.div>
-          ))}
+            </PopoverContent>
+          </Popover>
         </div>
-      </section>
+      </div>
+
+      <Tabs
+        defaultValue="user-videos"
+        className="w-full"
+        onValueChange={(value) => {
+          setActiveTab(value)
+          setCurrentPage(1)
+        }}
+      >
+        <TabsList className="w-full justify-start bg-zinc-800 p-0 h-12">
+          <TabsTrigger value="user-videos" className="flex-1 data-[state=active]:bg-zinc-700 rounded-none">
+            Your Videos
+          </TabsTrigger>
+          <TabsTrigger value="videos-for-sale" className="flex-1 data-[state=active]:bg-zinc-700 rounded-none">
+            Videos for Sale
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="user-videos" className="mt-6">
+          {userVideos.length > 0 ? (
+            renderVideoGrid(userVideos, true)
+          ) : (
+            <div className="text-center text-zinc-500">You haven't uploaded any videos yet.</div>
+          )}
+        </TabsContent>
+        <TabsContent value="videos-for-sale" className="mt-6">
+          {videosForSale.length > 0 ? (
+            renderVideoGrid(videosForSale, false)
+          ) : (
+            <div className="text-center text-zinc-500">No videos are currently for sale.</div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Listing Dialog */}
+      <Dialog open={isListingDialogOpen} onOpenChange={setIsListingDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>List Video for Sale</DialogTitle>
+            <DialogDescription>Set a price for your video. You can use up to 4 decimal places.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="price" className="text-right">
+                Price (AR)
+              </Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.0001"
+                min="0"
+                value={listingPrice}
+                onChange={(e) => setListingPrice(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={handleConfirmListing}>
+              Confirm Listing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
