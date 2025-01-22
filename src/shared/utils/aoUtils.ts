@@ -5,7 +5,7 @@ import { toast } from '@/components/ui/use-toast';
 // Utility function to delay execution
 const DEFAULT_RESULT_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
+// const RETRY_DELAY_MS = 1000;
 
 export const delay = (ms: number): Promise<void> =>
     new Promise((resolve) => setTimeout(resolve, ms));
