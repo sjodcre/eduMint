@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 
 // Utility function to delay execution
 const DEFAULT_RESULT_TIMEOUT = 30000; // 30 seconds
-const MAX_RETRIES = 10;
+const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 
 export const delay = (ms: number): Promise<void> =>
@@ -68,43 +68,49 @@ export const dryrunWithTimeout = async (
     tags: TagType[],
     data: any,
     timeoutMs: number = 20000
-  ): Promise<any> => {
+): Promise<any> => {
     let attempts = 0;
-  
+
     while (attempts < MAX_RETRIES) {
-      try {
-        console.log(`Dryrun attempt ${attempts + 1} for process ${processId}`);
-  
-        // Promise to timeout the request if it takes too long
-        const dryrunTimeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("dryrun() timed out")), timeoutMs)
-        );
-  
-        const dryrunPromise = dryrun({
-          process: processId,
-          tags: tags,
-          data: JSON.stringify(data || {}),
-        });
-  
-        const response = await Promise.race([dryrunPromise, dryrunTimeout]);
-  
-        if (response?.Messages) {
-          return response; // Return valid response if received
+        try {
+            console.log(`Dryrun attempt ${attempts + 1} for process ${processId}`);
+
+            // Promise to timeout the request if it takes too long
+            const dryrunTimeout = new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error("dryrun() timed out")), timeoutMs)
+            );
+
+            const dryrunPromise = dryrun({
+                process: processId,
+                tags: tags,
+                data: JSON.stringify(data || {}),
+            });
+
+            const response = await Promise.race([dryrunPromise, dryrunTimeout]);
+
+            if (!response || !response.Messages) {
+                console.error("Invalid response received from dryrunWithTimeout", response);
+                throw new Error("Failed to fetch posts, please try again.");
+            }
+
+            if (response?.Messages) {
+                return response; // Return valid response if received
+            }
+
+        } catch (error) {
+            console.warn(`Dryrun attempt ${attempts + 1} failed:`, error);
+            attempts++;
+            await new Promise((resolve) => setTimeout(resolve, 2 ** attempts * 2000));
+
+            if (attempts >= MAX_RETRIES) {
+                console.error("Max retries reached. Failed to fetch posts.");
+                toast({ description: "Failed to fetch posts after multiple attempts.", variant: "destructive" });
+                throw new Error("Failed to fetch posts after multiple attempts.");
+            }
         }
-  
-        console.warn(`Received invalid response, retrying...`, response);
-      } catch (error) {
-        console.warn(`Dryrun attempt ${attempts + 1} failed:`, error);
-      }
-  
-      attempts++;
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+
     }
-  
-    console.error("Max retries reached. Failed to fetch posts.");
-    toast({ description: "Failed to fetch posts after multiple attempts.", variant: "destructive" });
-    throw new Error("Failed to fetch posts after multiple attempts.");
-  };
+};
 
 export async function sendMessageWithTimeout(
     processId: string,
@@ -129,11 +135,11 @@ export async function sendMessageWithTimeout(
         const response = await Promise.race([messagePromise, timeoutPromise]);
 
         if (!response) {
-          console.error("Invalid response received from sendMessageWithTimeout", response);
-          toast({ description: "Failed to send message, please try again.", variant: "destructive" });
-          throw new Error("Failed to send message, please try again.");
+            console.error("Invalid response received from sendMessageWithTimeout", response);
+            toast({ description: "Failed to send message, please try again.", variant: "destructive" });
+            throw new Error("Failed to send message, please try again.");
         }
-    
+
         return response;
     } catch (error) {
         console.error(`Message process failed:`, error);
@@ -161,11 +167,11 @@ export async function fetchResultWithTimeout(
         const response = await Promise.race([resultPromise, timeoutPromise]);
 
         if (!response || !response.Messages) {
-          console.error("Invalid response received from fetchResultWithTimeout", response);
-          toast({ description: "Failed to fetch result, please try again.", variant: "destructive" });
-          throw new Error("Failed to fetch result, please try again.");
+            console.error("Invalid response received from fetchResultWithTimeout", response);
+            toast({ description: "Failed to fetch result, please try again.", variant: "destructive" });
+            throw new Error("Failed to fetch result, please try again.");
         }
-    
+
         return response;
     } catch (error) {
         console.error(`Result fetching failed:`, error);
