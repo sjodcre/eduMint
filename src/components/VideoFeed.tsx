@@ -16,6 +16,8 @@ export default function VideoFeed() {
   // const {videos, loading, error, fetchPlayerProfile} = useStore()
   const { setSelectedUser, walletAddress, wallet, isProfileLoading } = useArweaveProvider()
   const { setCurrentScreen } = useContext(ScreenContext)
+  const [isFetching, setIsFetching] = useState(false);
+  const eventBound = useRef(false);
   // const { connected, connect } = useConnection();
 
   const checkWalletConnection = async () => {
@@ -96,32 +98,59 @@ export default function VideoFeed() {
   useEffect(() => {
     const handleScreenChange = async () => {
       // Check if the hash matches '#videofeed'
-      if (window.location.hash === '#videofeed') {
-        console.log("Home button pressed - refreshing videos");
-        const updatedVideos = await fetchVideos();
-        setLocalVideos(updatedVideos || []);
+      if (isFetching) return;
+      setIsFetching(true);
+
+      try {
+        if (window.location.hash === '#videofeed') {
+          console.log("Home button pressed - refreshing videos");
+          const updatedVideos = await fetchVideos();
+          // setLocalVideos(updatedVideos || []);
+          setLocalVideos((prevVideos) => updatedVideos || prevVideos);
+        }
+      } catch (error) {
+        console.error("Error refreshing videos:", error);
+      } finally {
+        setIsFetching(false);
       }
     };
-  
-    const handleVisibilityChange = () => {
-      // When the app becomes visible again, check the hash
-      console.log("visibility change", document.hidden);
-      if (!document.hidden) {
-        handleScreenChange();
-      }
+
+    // const handleVisibilityChange = () => {
+    //   console.log("visibility change", document.hidden);
+      
+    //   // Debounce the visibility change event to prevent rapid multiple calls
+    //   clearTimeout(visibilityTimeout);
+    //   if (!document.hidden) {
+    //     visibilityTimeout = setTimeout(() => {
+    //       handleScreenChange();
+    //     }, 1000); // 1 second debounce to avoid excessive calls
+    //   }
+    // };
+    const handleAppResume = () => {
+      console.log("App resumed or tab focused, re-fetching videos...");
+      handleScreenChange();
     };
+
+    if (eventBound.current) return;
+    eventBound.current = true;
   
     // Add event listeners for hashchange and visibilitychange
-    window.addEventListener('hashchange', handleScreenChange);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // window.addEventListener('hashchange', handleScreenChange);
+    // document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener("pageshow", handleAppResume);
+    window.addEventListener("focus", handleAppResume);
   
     // Initial check
     handleScreenChange();
   
     // Cleanup
     return () => {
-      window.removeEventListener('hashchange', handleScreenChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // window.removeEventListener('hashchange', handleScreenChange);
+      // document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener("pageshow", handleAppResume);
+      window.removeEventListener("focus", handleAppResume);
+      eventBound.current = false;
+
     };
   }, []);
   
