@@ -83,7 +83,7 @@ export const dryrunWithTimeout = async (
             const dryrunPromise = dryrun({
                 process: processId,
                 tags: tags,
-                data: JSON.stringify({ ...(data || {}), _t: Date.now() }),
+                data: JSON.stringify({ ...(data || {}), _t: Date.now(), nonce: Math.random().toString(36).substring(7) }),
             });
 
             const response = await Promise.race([dryrunPromise, dryrunTimeout]);
