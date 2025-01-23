@@ -124,7 +124,7 @@ export function useVideos() {
           );
 
           if (!response || !response.Messages) {
-            console.error("Invalid response received from dryrunWithTimeout", response);
+            console.error("Failed to fetch posts from dryrunWithTimeout", response);
             throw new Error("Failed to fetch posts, please try again.");
           }
 

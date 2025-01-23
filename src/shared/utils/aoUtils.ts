@@ -83,10 +83,12 @@ export const dryrunWithTimeout = async (
             const dryrunPromise = dryrun({
                 process: processId,
                 tags: tags,
-                data: JSON.stringify({ ...(data || {}), _t: Date.now(), nonce: Math.random().toString(36).substring(7) }),
+                data: JSON.stringify({ ...(data || {}) }),
             });
 
             const response = await Promise.race([dryrunPromise, dryrunTimeout]);
+
+            console.log("response form dryrunWithTimeout", response);
 
             if (!response || !response.Messages) {
                 console.error("Invalid response received from dryrunWithTimeout", response);
