@@ -139,6 +139,9 @@ export default function VideoFeed() {
     // document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener("pageshow", handleAppResume);
     window.addEventListener("focus", handleAppResume);
+    window.addEventListener("hashchange", handleAppResume);
+
+    
   
     // Initial check
     handleScreenChange();
@@ -149,6 +152,7 @@ export default function VideoFeed() {
       // document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener("pageshow", handleAppResume);
       window.removeEventListener("focus", handleAppResume);
+      window.removeEventListener("hashchange", handleAppResume)
       eventBound.current = false;
 
     };

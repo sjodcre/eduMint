@@ -24,12 +24,12 @@ export default defineConfig({
 
     // },
 
-    // workbox: {
-    //   maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-    //   globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-    //   cleanupOutdatedCaches: true,
-    //   clientsClaim: true,
-    // },
+    workbox: {
+      maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+      globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+    },
 
     devOptions: {
       enabled: false,
@@ -38,6 +38,13 @@ export default defineConfig({
       type: 'module',
     },
   })],
+  server: {
+    cors: {
+      origin: "*", // Allow all origins (change to specific domains in production)
+      methods: ["GET", "POST", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    },
+  },
   // server: {
   //   // host: '0.0.0.0', // Allow access from external devices
   //   // port: 5173,
