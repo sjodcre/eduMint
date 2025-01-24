@@ -1,4 +1,4 @@
-import { createDataItemSigner, connect, dryrun, message, result } from '@permaweb/aoconnect';
+import { createDataItemSigner, connect } from '@permaweb/aoconnect';
 import type { TagType } from '@/shared/types';
 import { toast } from '@/components/ui/use-toast';
 
@@ -6,6 +6,10 @@ import { toast } from '@/components/ui/use-toast';
 const DEFAULT_RESULT_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
 // const RETRY_DELAY_MS = 1000;
+const { spawn, message, result, dryrun } = connect({
+    CU_URL: "https://cu28.ao-testnet.xyz",
+  });
+
 
 export const delay = (ms: number): Promise<void> =>
     new Promise((resolve) => setTimeout(resolve, ms));
@@ -24,7 +28,7 @@ export const spawnProcessWithTimeout = async (
     buffer: any,
     timeoutMs: number = 30000
 ): Promise<string> => {
-    const aos = connect();
+    // const aos = connect();
 
     const spawnTimeout = new Promise<string>((_, reject) =>
         setTimeout(() => reject(new Error("aos.spawn() timed out")), timeoutMs)
@@ -32,7 +36,8 @@ export const spawnProcessWithTimeout = async (
 
     try {
         console.log("Starting AO spawn process...");
-        const spawnPromise: Promise<string> = aos.spawn({
+        // const spawnPromise: Promise<string> = aos.spawn({
+        const spawnPromise: Promise<string> = spawn({
             module: "Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350",
             scheduler: "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA",
             signer: createDataItemSigner(wallet),

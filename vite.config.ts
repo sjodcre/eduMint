@@ -39,6 +39,16 @@ export default defineConfig({
     },
   })],
   // server: {
+  //   host: '0.0.0.0',  // Allows connections from local network
+  //   port: 5173,
+  //   strictPort: true, // Ensures consistent port usage
+  //   cors: true,  // Allow cross-origin requests during development
+  //   https: {
+  //     key: fs.readFileSync(path.resolve(__dirname, 'certs/key.pem')),
+  //     cert: fs.readFileSync(path.resolve(__dirname, 'certs/cert.pem'))
+  //   },
+  // },
+  // server: {
   //   // host: '0.0.0.0', // Allow access from external devices
   //   // port: 5173,
   //   // https: {
