@@ -24,12 +24,12 @@ export default defineConfig({
 
     // },
 
-    // workbox: {
-    //   maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-    //   globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-    //   cleanupOutdatedCaches: true,
-    //   clientsClaim: true,
-    // },
+    workbox: {
+      maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+      globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+    },
 
     devOptions: {
       enabled: false,
