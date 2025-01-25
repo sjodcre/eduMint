@@ -7,7 +7,7 @@ import { User } from "@/shared/types/user";
 import { ProfileHeaderType } from "@/shared/types";
 import { getProfileByWalletAddress } from "@/api/profile-api";
 import othent from "@/shared/lib/othent";
-import { toast } from "@/components/ui/use-toast";
+// import { toast } from "@/components/ui/use-toast";
 
 export enum WalletEnum {
   arConnect = "arconnect",
@@ -125,10 +125,10 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
     (async function () {
       if (wallet && walletAddress) {
         try {
-          toast({ description: `walletAddress to be passed: ${walletAddress}`, variant: "destructive", className: "text-white"  });
+          // toast({ description: `walletAddress to be passed: ${walletAddress}`, variant: "destructive", className: "text-white"  });
           const fetchedProfile = await getProfileByWalletAddress({ address: walletAddress }, setIsProfileLoading);
           setProfile(fetchedProfile);
-          toast({ description: `walletAddress: ${walletAddress}, fetchedProfile: ${JSON.stringify(fetchedProfile)}`, variant: "destructive", className: "text-white" });
+          // toast({ description: `walletAddress: ${walletAddress}, fetchedProfile: ${JSON.stringify(fetchedProfile)}`, variant: "destructive", className: "text-white" });
           console.log("profile at useEffect with wallet, walletAddress, walletType: ", fetchedProfile);
           
           if (fetchedProfile === null || fetchedProfile?.version === null) {
@@ -170,7 +170,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
   // }
 
   async function handleWallet() {
-    toast({ description: "handleWallet", variant: "destructive" });
+    // toast({ description: "handleWallet", variant: "destructive" });
     if (localStorage.getItem("walletType")) {
       try {
         setProfile(null);
