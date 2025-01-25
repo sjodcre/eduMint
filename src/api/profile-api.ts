@@ -1,4 +1,4 @@
-import { toast } from "@/components/ui/use-toast";
+// import { toast } from "@/components/ui/use-toast";
 import { processIdRegistry } from "@/shared/config/config";
 import { ProfileHeaderType, TagType } from "@/shared/types";
 import { dryrunWithTimeout } from "@/shared/utils/aoUtils";
@@ -78,7 +78,7 @@ export async function getProfileByWalletAddress(
 	  version: null,
 	};
 
-	toast({ description: `getProfileByWalletAddress args: ${JSON.stringify(args)}`, variant: "destructive", className: "text-white" });
+	// toast({ description: `getProfileByWalletAddress args: ${JSON.stringify(args)}`, variant: "destructive", className: "text-white" });
   
 	if (!args.address) {
 	  return emptyProfile; // Return empty profile if no wallet address
@@ -105,7 +105,7 @@ export async function getProfileByWalletAddress(
 		const parsedData = JSON.parse(profileLookup.Messages[0].Data);
 		if (parsedData.length > 0 && parsedData[0].ProfileId) {
 		  activeProfileId = parsedData[0].ProfileId;
-		  toast({ description: `activeProfileId: ${activeProfileId}`, variant: "destructive", className: "text-white" });
+		//   toast({ description: `activeProfileId: ${activeProfileId}`, variant: "destructive", className: "text-white" });
 		}
 	  }
   
@@ -120,10 +120,10 @@ export async function getProfileByWalletAddress(
 		);
   
 		console.log("fetchedProfile: ", fetchedProfile);
-		toast({ description: `fetchedProfile function: ${JSON.stringify(fetchedProfile)}`, variant: "destructive", className: "text-white" });
+		// toast({ description: `fetchedProfile function: ${JSON.stringify(fetchedProfile)}`, variant: "destructive", className: "text-white" });
 		if (fetchedProfile?.Messages?.length && fetchedProfile.Messages[0].Data) {
 		  const profileData = JSON.parse(fetchedProfile.Messages[0].Data);
-		  toast({ description: `profileData: ${JSON.stringify(profileData)}`, variant: "destructive", className: "text-white" });
+		//   toast({ description: `profileData: ${JSON.stringify(profileData)}`, variant: "destructive", className: "text-white" });
 		
 		  return {
 			id: activeProfileId,

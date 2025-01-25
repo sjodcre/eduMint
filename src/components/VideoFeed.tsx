@@ -480,7 +480,7 @@ function VideoCard({
     if (!arProvider.profile) return;
     try {
       console.log("post author: ", video.user.id);
-      await transferAR(arProvider.profile.walletAddress, video.user.id); // Pass the toast function
+      await transferAR(arProvider.profile.walletAddress, video.user.id);
 
     } catch (error: any) {
       console.error("Error sending tip:", error);
