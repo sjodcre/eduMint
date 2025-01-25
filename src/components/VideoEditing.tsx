@@ -55,6 +55,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
   //ui states
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
+  const [compressedVideoSrc, setCompressedVideoSrc] = useState<string | null>(null);
   // const hasLargeVideo = videoFile?.size && videoFile.size > 3 * 1024 * 1024; // 3MB in bytes
 
   // useEffect(() => {
@@ -245,6 +246,9 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
                 { name: 'Payment-Address', value: 'dMAl8ZjkibRhma_rN8pDYiBW1DeWhvKYcBfqUfu-VhA' }
               ];
               const buffer: any = await fileToBuffer(videoToUpload);
+              console.log(`Buffer size: ${buffer.length} bytes`);
+              toast({ description: `Buffer size: ${buffer.length} bytes` });
+
               let processSrc = null;
               try {
                 const processSrcFetch = await fetch("https://arweave.net/6-Km3rEooyc0lS4_mr9pksnJZNCHxb0XcsI7pSCE-yY");
@@ -585,7 +589,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       const { file: compressedFile, url: compressedBlobUrl } = await convert(file, defaultSettings);
       console.log(`Original size: ${formatFileSize(fileSizes.original)}`);
       console.log(`Converted size: ${formatFileSize(fileSizes.converted || 0)}`);
-      // setCompressedVideoSrc(compressedBlobUrl);
+      setCompressedVideoSrc(compressedBlobUrl);
       console.log(`Compressed file size: ${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`);
 
       return compressedFile;
@@ -739,14 +743,14 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
                 className="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600">
                 Trim and Merge
               </Button>
-              {/* <Button 
+              <Button 
                 onClick={() => handleCompress(videoFile)}
                 className="px-4 py-2 bg-purple-500 text-white rounded-md shadow-md hover:bg-purple-600">
                 Test Compression
-              </Button> */}
+              </Button>
             </div>
 
-            {/* {compressedVideoSrc && (
+            {compressedVideoSrc && (
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Compressed Video Preview</h3>
                 <video
@@ -759,7 +763,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
                   <span>Converted size: {formatFileSize(fileSizes.converted || 0)}</span>
                 </div>
               </div>
-            )} */}
+            )}
 
             {videoDuration > 30 ? (
               <div className="text-red-500 mb-4">

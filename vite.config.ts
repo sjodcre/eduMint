@@ -15,14 +15,14 @@ export default defineConfig({
       disabled: false,
       config: true,
     },
+    manifest: false,
+    // manifest: {
+    //   name: 'nftfix',
+    //   short_name: 'nftfix',
+    //   description: 'nftfix',
+    //   theme_color: '#ffffff',
 
-    manifest: {
-      name: 'nftfix',
-      short_name: 'nftfix',
-      description: 'nftfix',
-      theme_color: '#ffffff',
-
-    },
+    // },
 
     workbox: {
       maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
@@ -38,21 +38,31 @@ export default defineConfig({
       type: 'module',
     },
   })],
-  server: {
-    // host: '0.0.0.0', // Allow access from external devices
-    // port: 5173,
-    // https: {
-    //   key: fs.readFileSync('./key.pem'),
-    //   cert: fs.readFileSync('./cert.pem'),
-    // },
-    proxy : {
-      "/api": {
-      // target: 'https://ans-stats.decent.land',
-      target: 'https://cu45.ao-testnet.xyz',
-      changeOrigin: true,
-      rewrite: (path) => path.replace(/^\/api/, '')
-    }}
-  },
+  // server: {
+  //   host: '0.0.0.0',  // Allows connections from local network
+  //   port: 5173,
+  //   strictPort: true, // Ensures consistent port usage
+  //   cors: true,  // Allow cross-origin requests during development
+  //   https: {
+  //     key: fs.readFileSync(path.resolve(__dirname, 'certs/key.pem')),
+  //     cert: fs.readFileSync(path.resolve(__dirname, 'certs/cert.pem'))
+  //   },
+  // },
+  // server: {
+  //   // host: '0.0.0.0', // Allow access from external devices
+  //   // port: 5173,
+  //   // https: {
+  //   //   key: fs.readFileSync('./key.pem'),
+  //   //   cert: fs.readFileSync('./cert.pem'),
+  //   // },
+  //   proxy : {
+  //     "/api": {
+  //     // target: 'https://ans-stats.decent.land',
+  //     target: 'https://cu45.ao-testnet.xyz',
+  //     changeOrigin: true,
+  //     rewrite: (path) => path.replace(/^\/api/, '')
+  //   }}
+  // },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
