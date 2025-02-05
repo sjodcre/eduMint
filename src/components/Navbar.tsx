@@ -1,4 +1,4 @@
-import { Home, DollarSign, User, Plus } from "lucide-react";
+import { Home, DollarSign, User, Plus, GraduationCap} from "lucide-react";
 import { Button } from "./ui/button";
 import { ScreenContext } from "@/context/ScreenContext";
 import { useContext } from "react";
@@ -71,7 +71,7 @@ export function BottomNav() {
         <Plus className="text-white" size={24} />
         <span className="sr-only">Recent</span>
       </Button>
-      <Button
+      {/* <Button
         variant="ghost"
         size="icon"
         // onClick={() => setCurrentScreen("market")}
@@ -83,6 +83,19 @@ export function BottomNav() {
       >
         <DollarSign className="text-white" size={24} />
         <span className="sr-only">Earnings</span>
+      </Button> */}
+      <Button
+        variant="ghost"
+        size="icon"
+        // onClick={() => setCurrentScreen("market")}
+        onClick={() => {
+          setCurrentScreen("course");
+          window.location.hash = "#course";
+          console.log("course button pressed");
+        }}
+      >
+        <GraduationCap className="text-white" size={24} />
+        <span className="sr-only">Course</span>
       </Button>
       <Button
         variant="ghost"
