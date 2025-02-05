@@ -5,7 +5,7 @@ import { useContext } from "react";
 // import ProfilePage from "./pages/profile/profile-page";
 // import { useArweaveProvider } from "./context/ArweaveProvider";
 import { BottomNav } from "./components/Navbar";
-import Upload from "./pages/post/upload.";
+import Upload from "./pages/post/upload";
 // import { Market } from "./pages/market/market";
 import { Toaster } from "./components/ui/toaster";
 import ProfilePagePlaceholder from "./pages/profile/profile-demo";
