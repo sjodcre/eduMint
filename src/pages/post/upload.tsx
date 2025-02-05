@@ -11,6 +11,7 @@ export default function Upload() {
     // Handle post-upload actions here
     setShowVideoUploader(false);
     setCurrentScreen("videofeed")
+    window.location.hash = "#videofeed";
   };
 
   // const handleCancel = () => {
