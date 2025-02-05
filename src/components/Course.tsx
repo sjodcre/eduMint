@@ -9,6 +9,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import VideoPlayer from "@/components/CourseVideoPlayer"
 import TestComponent from "@/components/TestComponent"
 
 interface JourneyPoint {
@@ -82,15 +83,27 @@ interface StarDialogProps {
   onActivate: () => void
   onDeactivate: () => void
   isActive: boolean
+  onWatchVideo: (videoUrl: string) => void; // Pass video URL to index.tsx
+
 }
 
-const StarDialog = ({ isOpen, onClose, levelId, starId, onActivate, onDeactivate, isActive }: StarDialogProps) => {
+const StarDialog = ({ isOpen, onClose, levelId, starId, onActivate, onDeactivate, isActive , onWatchVideo}: StarDialogProps) => {
   const stage = journeyPoints.find((point) => point.id === levelId);
   const isTestStage = stage?.isTest;
   const videoUrl = stage?.videoUrls?.[starId - 1]; // Get video based on starId (1-indexed)
+  const [isVideoOpen, setIsVideoOpen] = useState(false); // Track if full-screen video is open
+
   // const isTestStage = journeyPoints.find((point) => point.id === levelId)?.isTest;
 
+  const handleWatchVideo = () => {
+    if (videoUrl) {
+      onClose(); // Close the StarDialog first
+      setTimeout(() => onWatchVideo(videoUrl), 300); // Small delay to ensure smooth transition
+    }
+  };
+
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] bg-gray-900 border-cyan-500 text-white">
         <DialogHeader>
@@ -120,9 +133,19 @@ const StarDialog = ({ isOpen, onClose, levelId, starId, onActivate, onDeactivate
           ) : (
             <Button onClick={onActivate}>Activate Star</Button>
           )}
+          {/* Watch Video Button */}
+          {videoUrl && !isTestStage && (
+            //   <Button onClick={() => setIsVideoOpen(true)} variant="default">
+            <Button onClick={handleWatchVideo} variant="default">
+                Watch Video
+              </Button>
+            )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    {isVideoOpen && videoUrl && <VideoPlayer videoUrl={videoUrl} onClose={() => setIsVideoOpen(false)} />}
+    </>
+    
   );
 };
 
@@ -207,6 +230,8 @@ interface CourseProps {
     setCurrentPoint: React.Dispatch<React.SetStateAction<number>>;
     setActiveStars: React.Dispatch<React.SetStateAction<Record<number, Record<number, boolean>>>>;
     setTestScores: React.Dispatch<React.SetStateAction<Record<number, number>>>;
+    onWatchVideo: (videoUrl: string) => void; // New prop
+
   }
 
 // export default function Course() {
@@ -217,7 +242,8 @@ export default function Course({
     testScores, 
     setCurrentPoint, 
     setActiveStars, 
-    setTestScores 
+    setTestScores,
+    onWatchVideo
  }: CourseProps) {
   const [selectedStar, setSelectedStar] = useState<{
     isOpen: boolean
@@ -229,6 +255,7 @@ export default function Course({
     testId?: number
   }>({ isOpen: false })
   const [showTest, setShowTest] = useState(false)
+  
 
   useEffect(() => {
     // Check if all stars in the current level are activated
@@ -611,6 +638,8 @@ export default function Course({
         onDeactivate={handleDeactivateStar}
         // isActive={(activeStars[selectedStar.levelId || 0] || 0) >= (selectedStar.starId || 0)}
         isActive={!!activeStars[selectedStar.levelId || 0]?.[selectedStar.starId || 0]} 
+        onWatchVideo={onWatchVideo} // Pass up to index.tsx
+
       />
 
       {/* Test Dialog */}

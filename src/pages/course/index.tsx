@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import VideoPlayer from "@/components/CourseVideoPlayer";
 
 export default function CoursePage() {
   const [isTesting, setIsTesting] = useState(false);
@@ -18,6 +19,8 @@ export default function CoursePage() {
   const [testScores, setTestScores] = useState<{ [key: number]: number }>({});
   const [currentPoint, setCurrentPoint] = useState<number>(1)
   const [activeStars, setActiveStars] = useState<{ [key: number]: { [starId: number]: boolean } }>({});
+
+  const [videoUrl, setVideoUrl] = useState<string | null>(null); // Track video being played
 
   const startTest = (testId: number) => {
     setCurrentTestId(testId);
@@ -54,6 +57,7 @@ export default function CoursePage() {
           setActiveStars={setActiveStars}
           testScores={testScores}
           setTestScores={setTestScores}
+          onWatchVideo={(url) => setVideoUrl(url)} // Handle video watch
         />
       )}
 
@@ -83,6 +87,9 @@ export default function CoursePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {videoUrl && <VideoPlayer videoUrl={videoUrl} onClose={() => setVideoUrl(null)} />}
+
     </div>
   );
 }
