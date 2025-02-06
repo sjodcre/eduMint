@@ -11,20 +11,39 @@ import { Toaster } from "./components/ui/toaster";
 import ProfilePagePlaceholder from "./pages/profile/profile-demo";
 import Course from "./pages/course";
 
+// export default function App() {
+//   const { currentScreen } = useContext(ScreenContext);
+//   // const {selectedUser} = useArweaveProvider()
+//   return (
+//     <div className="pb-16">
+//       {currentScreen === "onboarding" && <OnBoard />}
+//       {currentScreen === "videofeed" && <VideoFeed />}
+//       {currentScreen === "upload" && <Upload />}
+//       {/* {currentScreen === "market" && <Market />} */}
+//       {currentScreen === "course" && <Course />}
+//       {/* {currentScreen === "profile" && <ProfilePage user={selectedUser || null}/>} */}
+//       {currentScreen === "profile" && <ProfilePagePlaceholder />}
+//       <Toaster />
+//       <BottomNav/>
+//     </div>
+//   );
+// }
+
 export default function App() {
   const { currentScreen } = useContext(ScreenContext);
-  // const {selectedUser} = useArweaveProvider()
+
   return (
-    <div className="pb-16">
-      {currentScreen === "onboarding" && <OnBoard />}
-      {currentScreen === "videofeed" && <VideoFeed />}
-      {currentScreen === "upload" && <Upload />}
-      {/* {currentScreen === "market" && <Market />} */}
-      {currentScreen === "course" && <Course />}
-      {/* {currentScreen === "profile" && <ProfilePage user={selectedUser || null}/>} */}
-      {currentScreen === "profile" && <ProfilePagePlaceholder />}
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="flex-grow overflow-y-auto pb-16">
+        {currentScreen === "onboarding" && <OnBoard />}
+        {currentScreen === "videofeed" && <VideoFeed />}
+        {currentScreen === "upload" && <Upload />}
+        {currentScreen === "course" && <Course />}
+        {currentScreen === "profile" && <ProfilePagePlaceholder />}
+      </div>
       <Toaster />
-      <BottomNav/>
+      <BottomNav />
     </div>
   );
 }
+

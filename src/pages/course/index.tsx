@@ -45,7 +45,7 @@ export default function CoursePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="bg-gray-900 text-white">
       {isTesting && currentTestId ? (
         <TestComponent testId={currentTestId} onComplete={completeTest} />
       ) : (

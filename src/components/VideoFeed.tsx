@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import { Heart, Bookmark, BadgeDollarSign, Volume2, VolumeX} from "lucide-react";
+import { Heart, Bookmark, BadgeDollarSign, Volume2, VolumeX } from "lucide-react";
 import { useVideos } from "../hooks/useVideos";
 import { Video, User } from "../shared/types/user";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
@@ -13,6 +13,8 @@ import { fetchResultWithTimeout, sendMessageWithTimeout } from "@/shared/utils/a
 export default function VideoFeed() {
   const { videos, loading, refetch: fetchVideos, error } = useVideos();
   const [localVideos, setLocalVideos] = useState(videos);
+  const [page, setPage] = useState(1);
+  const [hasMoreVideos, setHasMoreVideos] = useState(true); // ✅ Track if more videos exist
   // const {videos, loading, error, fetchPlayerProfile} = useStore()
   const { setSelectedUser, walletAddress, wallet, isProfileLoading } = useArweaveProvider()
   const { setCurrentScreen } = useContext(ScreenContext)
@@ -45,23 +47,10 @@ export default function VideoFeed() {
   };
 
   // useEffect(() => {
-  //   const loadVideos = async () => {
-  //     // if (videos.length === 0) {
-  //       const result = await fetchVideos();
-  //       if (result === null) {
-  //         setVideoStatus(false);
-  //       } else {
-  //         setVideoStatus(true);
-  //         setLocalVideos(videos);
-  //       }
-  //     // }
-  //   };
-  //   loadVideos();
-  // }, []);
-
-  useEffect(() => {
-    setLocalVideos(videos);
-  }, [videos]);
+  //   console.log("setting local videos at useEffect");
+  //   console.log("videos", videos);
+  //   setLocalVideos(videos);
+  // }, [videos]);
 
   // useEffect(() => {
   //   const handleScreenChange = async () => {
@@ -117,7 +106,7 @@ export default function VideoFeed() {
 
     // const handleVisibilityChange = () => {
     //   console.log("visibility change", document.hidden);
-      
+
     //   // Debounce the visibility change event to prevent rapid multiple calls
     //   clearTimeout(visibilityTimeout);
     //   if (!document.hidden) {
@@ -133,17 +122,17 @@ export default function VideoFeed() {
 
     if (eventBound.current) return;
     eventBound.current = true;
-  
+
     // Add event listeners for hashchange and visibilitychange
     // window.addEventListener('hashchange', handleScreenChange);
     // document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener("pageshow", handleAppResume);
     window.addEventListener("focus", handleAppResume);
     window.addEventListener("hashchange", handleAppResume);
-  
+
     // Initial check
     handleScreenChange();
-  
+
     // Cleanup
     return () => {
       // window.removeEventListener('hashchange', handleScreenChange);
@@ -155,14 +144,35 @@ export default function VideoFeed() {
 
     };
   }, []);
-  
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+
+  // const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+  //   const bottom =
+  //     e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
+  //     e.currentTarget.clientHeight;
+  //   if (bottom && !loading) {
+  //     console.log("at the bottom of the feed, fetching more videos");
+  //     fetchVideos();
+  //   }
+  // };
+
+  const handleScroll = async (e: React.UIEvent<HTMLDivElement>) => {
+    if (loading || !hasMoreVideos) return; // ✅ Stop fetching if no more videos
+
     const bottom =
       e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
       e.currentTarget.clientHeight;
-    if (bottom && !loading) {
-      console.log("at the bottom of the feed, fetching more videos");
-      fetchVideos();
+
+    if (bottom) {
+      console.log(`Fetching more videos for page ${page + 1}`);
+      const newVideos = await fetchVideos(page + 1);
+
+      if (newVideos.length > 0) {
+        setPage(prevPage => prevPage + 1);
+        setLocalVideos(prevVideos => [...prevVideos, ...newVideos]); // Append new videos
+        console.log("local videos", localVideos);
+      } else {
+        setHasMoreVideos(false); // ✅ No more videos, stop further fetching
+      }
     }
   };
 
@@ -258,17 +268,6 @@ export default function VideoFeed() {
     //   prevPosts.map((p) => (p.ID === updatedPost.ID ? updatedPost : p))
     // );
   };
-
-  // const handleLike = (videoId: string, liked: boolean) => {
-  //   console.log("Liking a video", videoId, liked);
-  //   setLocalVideos((prevVideos) =>
-  //     prevVideos.map((video) =>
-  //       video.id === videoId
-  //         ? { ...video, likes: liked ? video.likes + 1 : video.likes - 1 }
-  //         : video,
-  //     ),
-  //   );
-  // };
 
   const handleLike = async (video: Video) => {
     if (!await checkWalletConnection()) return;
@@ -373,7 +372,9 @@ export default function VideoFeed() {
   // localVideos.map((video) => console.log(video));
   return (
     <>
-      <div className="h-screen overflow-y-auto" onScroll={handleScroll}>
+      {/* <div className="h-screen overflow-y-auto snap-y snap-mandatory" onScroll={handleScroll}> */}
+      <div className="h-[calc(100vh-4rem)] overflow-y-auto snap-y snap-mandatory" onScroll={handleScroll}>
+
         {localVideos.map((video) => (
           <VideoCard
             key={video.id}
@@ -383,8 +384,17 @@ export default function VideoFeed() {
             onBookmark={() => handleBookmarkVideo(video)}
           />
         ))}
-        {loading && (
+        {/* {loading && (
           <div className="flex justify-center p-4">Loading more...</div>
+        )} */}
+        {loading && (
+          <div className="flex justify-center items-center p-4 bg-black text-gray-300">
+            <svg className="animate-spin h-6 w-6 text-gray-500 mr-2" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span className="text-gray-400">Loading more...</span>
+          </div>
         )}
       </div>
     </>
@@ -403,7 +413,7 @@ function VideoCard({
   onBookmark: () => Promise<void>;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-    // @ts-ignore
+  // @ts-ignore
   const [isLiked, setIsLiked] = useState(video.liked);
   const arProvider = useArweaveProvider();
   // const { connected, connect } = useConnection();
@@ -493,10 +503,10 @@ function VideoCard({
   };
 
   return (
-    <div className="relative h-screen w-full bg-black snap-start flex items-center justify-center">
+    <div className="relative h-full w-full bg-black snap-start flex items-center justify-center">
       <video
         ref={videoRef}
-        className="h-full w-full object-contain md:max-w-[400px] md:max-h-[calc(100vh-80px)]"
+        className="h-full w-full object-cover"
         loop
         muted={isMuted}
         playsInline
@@ -504,12 +514,12 @@ function VideoCard({
         <source src={video.videoUrl} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      <div className="absolute bottom-32 left-4 right-4">
+      <div className="absolute bottom-16 left-4 right-4">
         <h2 className="text-white text-lg font-bold mb-1">{video.title}</h2>
         <p className="text-white text-sm mb-2">{video.description.split(' ').slice(0, 20).join(' ') + (video.description.split(' ').length > 20 ? '...' : '')}</p>
       </div>
 
-      <div className="absolute bottom-20 left-4 flex items-center">
+      <div className="absolute bottom-4 left-4 flex items-center">
         <button
           onClick={() => onProfileClick(video.user)}
           className="flex items-center"
@@ -530,8 +540,8 @@ function VideoCard({
         </button>
       </div>
 
-      <div className="absolute bottom-20 right-4 flex flex-col items-center space-y-4">
-      <button
+      <div className="absolute bottom-4 right-4 flex flex-col items-center space-y-4">
+        <button
           className="flex flex-col items-center text-white"
           title={isMuted ? "Unmute" : "Mute"}
           onClick={toggleMute}

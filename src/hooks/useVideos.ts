@@ -63,7 +63,7 @@ export function useVideos() {
   };
 
   // const fetchVideos = async () => {
-  const fetchVideos = async (): Promise<Video[]> => {
+  const fetchVideos = async (pageNum: number, limit: number = 10): Promise<Video[]> => {
     try {
       setLoading(true);
       setError(null);
@@ -86,6 +86,8 @@ export function useVideos() {
             [
               { name: "Action", value: "List-Posts-Likes" },
               { name: "Author-Id", value: profile.walletAddress },
+              { name: "Page", value: pageNum.toString() },
+              { name: "Limit", value: limit.toString() },
             ],
             wallet,
             "",
@@ -118,7 +120,10 @@ export function useVideos() {
           console.log("fetching videos without profile");
           const response = await dryrunWithTimeout(
             processId, 
-            [{ name: "Action", value: "List-Posts" }], 
+            [{ name: "Action", value: "List-Posts" },
+              { name: "Page", value: pageNum.toString() },
+              { name: "Limit", value: limit.toString() },
+            ], 
             null, 
             30000
           );
@@ -148,7 +153,10 @@ export function useVideos() {
         console.log("fetching videos without wallet connection");
         const response = await dryrunWithTimeout(
           processId, 
-          [{ name: "Action", value: "List-Posts" }], 
+          [{ name: "Action", value: "List-Posts" },
+            { name: "Page", value: pageNum.toString() },
+            { name: "Limit", value: limit.toString() },
+          ], 
           null, 
           30000
         );
@@ -187,7 +195,7 @@ export function useVideos() {
 
   useEffect(() => {
     if (window.arweaveWallet) {
-      fetchVideos();
+      fetchVideos(1);
       console.log("useVideos useEffect fetch videos ");
     }
 // }, [connected]);
@@ -197,6 +205,8 @@ export function useVideos() {
     videos,
     loading,
     error,
-    refetch: () => fetchVideos(),
+    // refetch: () => fetchVideos(1),
+    refetch: (page = 1) => fetchVideos(page), // ✅ Allow page as an argument
+
   };
 }
