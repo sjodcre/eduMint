@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 
-type Screen = "onboarding" | "videofeed" | "profile" | "market" | "upload";
+type Screen = "onboarding" | "videofeed" | "profile" | "market" | "upload" | "course";
 
 interface ScreenContextType {
   currentScreen: Screen;
