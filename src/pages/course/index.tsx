@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import Course from "@/components/Course";
 import TestComponent from "@/components/TestComponent";
 import {
@@ -11,10 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/CourseVideoPlayer";
+import { sendMessageWithTimeout } from "@/shared/utils/aoUtils";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
+import { processId } from "@/shared/config/config";
+import { ScreenContext } from "@/context/ScreenContext";
 
 export default function CoursePage() {
-  const { courseProgress, setCourseProgress } = useArweaveProvider();
+  const { courseProgress, setCourseProgress, profile, wallet } = useArweaveProvider();
   const [isTesting, setIsTesting] = useState(false);
   const [currentTestId, setCurrentTestId] = useState<number | null>(null);
   const [showTestDialog, setShowTestDialog] = useState(false);
@@ -24,15 +27,71 @@ export default function CoursePage() {
     [key: number]: { [starId: number]: boolean };
   }>({});
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { currentScreen } = useContext(ScreenContext);
+  console.log("activeStars in course page: ", activeStars);
 
-  // Update states when courseProgress loads
+  const testScoresRef = useRef(testScores);
+  const activeStarsRef = useRef(activeStars);
+  const currentPointRef = useRef(currentPoint);
+
   useEffect(() => {
+    testScoresRef.current = testScores;
+    activeStarsRef.current = activeStars;
+    currentPointRef.current = currentPoint;
+  }, [testScores, activeStars, currentPoint]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      // If courseProgress is still null after 10s, load defaults
+      if (courseProgress === null) {
+        setTestScores({});
+        setCurrentPoint(1);
+        setActiveStars({});
+        setIsLoading(false);
+      }
+    }, 10000);
+
     if (courseProgress !== null) {
       setTestScores(courseProgress.testScores);
       setCurrentPoint(courseProgress.currentPoint);
       setActiveStars(courseProgress.activeStars);
+      setIsLoading(false);
+      clearTimeout(timeoutId);
     }
+
+    return () => clearTimeout(timeoutId);
   }, [courseProgress]);
+
+  useEffect(() => {
+    const handleAppVisibility = () => {
+      if (document.hidden) {
+        console.log("App went to background, saving progress...");
+        saveProgressIfNeeded();
+      }
+    };
+  
+    const handleBeforeUnload = () => {
+      console.log("App is closing, saving progress...");
+      saveProgressIfNeeded();
+    };
+  
+    document.addEventListener("visibilitychange", handleAppVisibility);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+  
+    return () => {
+      document.removeEventListener("visibilitychange", handleAppVisibility);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      console.log("Leaving Course Page, saving progress...");
+      saveProgressIfNeeded();
+    };
+  }, [currentScreen]); // Runs when `currentScreen` changes
+  
 
   const startTest = (testId: number) => {
     setCurrentTestId(testId);
@@ -43,6 +102,58 @@ export default function CoursePage() {
     setShowTestDialog(false);
     setIsTesting(true);
   };
+
+  const saveProgressIfNeeded = async () => {
+    if (!courseProgress || !profile) return; // No progress loaded yet
+  
+    const latestTestScores = testScoresRef.current;
+    const latestActiveStars = activeStarsRef.current;
+    const latestCurrentPoint = currentPointRef.current;
+  
+    console.log("Latest testScores before save: ", latestTestScores);
+    console.log("Latest activeStars before save: ", latestActiveStars);
+  
+    const hasChanges =
+      latestCurrentPoint !== courseProgress.currentPoint ||
+      JSON.stringify(latestTestScores) !== JSON.stringify(courseProgress.testScores) ||
+      JSON.stringify(latestActiveStars) !== JSON.stringify(courseProgress.activeStars);
+  
+    if (!hasChanges) {
+      console.log("No changes detected, skipping save.");
+      return;
+    }
+  
+    console.log("Saving course progress...");
+  
+    try {
+      const res = await sendMessageWithTimeout(
+        processId,
+        [
+          { name: "Action", value: "Save-Course-Progress" },
+          { name: "UserWID", value: profile.walletAddress },
+          { name: "CurrentPoint", value: latestCurrentPoint.toString() },
+          { name: "TestScores", value: JSON.stringify(latestTestScores) },
+          { name: "ActiveStars", value: JSON.stringify(latestActiveStars) },
+        ],
+        wallet,
+        "",
+        20000
+      );
+      console.log("Save Course Progress result", res);
+      console.log("Course progress saved!");
+
+      setCourseProgress({
+        currentPoint: latestCurrentPoint,
+        testScores: latestTestScores,
+        activeStars: latestActiveStars,
+      });
+
+    } catch (error) {
+      console.error("Failed to save progress:", error);
+    }
+  };
+  
+  
 
   const completeTest = (testId: number, score: number) => {
     console.log(`Test ${testId} completed with score: ${score}`);
@@ -55,6 +166,17 @@ export default function CoursePage() {
     setIsTesting(false);
     setCurrentTestId(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-gray-900 text-white h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 text-xl">Loading course progress...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-900 text-white">
