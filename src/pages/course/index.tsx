@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Course from "@/components/Course";
 import TestComponent from "@/components/TestComponent";
 import {
@@ -11,16 +11,28 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/CourseVideoPlayer";
+import { useArweaveProvider } from "@/context/ArweaveProvider";
 
 export default function CoursePage() {
+  const { courseProgress, setCourseProgress } = useArweaveProvider();
   const [isTesting, setIsTesting] = useState(false);
   const [currentTestId, setCurrentTestId] = useState<number | null>(null);
   const [showTestDialog, setShowTestDialog] = useState(false);
-  const [testScores, setTestScores] = useState<{ [key: number]: number }>({});
-  const [currentPoint, setCurrentPoint] = useState<number>(1)
-  const [activeStars, setActiveStars] = useState<{ [key: number]: { [starId: number]: boolean } }>({});
+  const [testScores, setTestScores] = useState<{ [key: number]: number }>({}); 
+  const [currentPoint, setCurrentPoint] = useState<number>(1);
+  const [activeStars, setActiveStars] = useState<{
+    [key: number]: { [starId: number]: boolean };
+  }>({});
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
-  const [videoUrl, setVideoUrl] = useState<string | null>(null); // Track video being played
+  // Update states when courseProgress loads
+  useEffect(() => {
+    if (courseProgress !== null) {
+      setTestScores(courseProgress.testScores);
+      setCurrentPoint(courseProgress.currentPoint);
+      setActiveStars(courseProgress.activeStars);
+    }
+  }, [courseProgress]);
 
   const startTest = (testId: number) => {
     setCurrentTestId(testId);
@@ -56,7 +68,7 @@ export default function CoursePage() {
           activeStars={activeStars}
           setActiveStars={setActiveStars}
           testScores={testScores}
-          setTestScores={setTestScores}
+          // setTestScores={setTestScores}
           onWatchVideo={(url) => setVideoUrl(url)} // Handle video watch
         />
       )}
