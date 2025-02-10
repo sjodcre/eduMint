@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import VideoPlayer from "@/components/CourseVideoPlayer"
-import TestComponent from "@/components/TestComponent"
+// import TestComponent from "@/components/TestComponent"
 
 interface JourneyPoint {
   id: number
@@ -229,7 +229,7 @@ interface CourseProps {
     testScores: Record<number, number>;
     setCurrentPoint: React.Dispatch<React.SetStateAction<number>>;
     setActiveStars: React.Dispatch<React.SetStateAction<Record<number, Record<number, boolean>>>>;
-    setTestScores: React.Dispatch<React.SetStateAction<Record<number, number>>>;
+    // setTestScores: React.Dispatch<React.SetStateAction<Record<number, number>>>;
     onWatchVideo: (videoUrl: string) => void; // New prop
 
   }
@@ -242,7 +242,7 @@ export default function Course({
     testScores, 
     setCurrentPoint, 
     setActiveStars, 
-    setTestScores,
+    // setTestScores,
     onWatchVideo
  }: CourseProps) {
   const [selectedStar, setSelectedStar] = useState<{
@@ -250,24 +250,20 @@ export default function Course({
     levelId?: number
     starId?: number
   }>({ isOpen: false })
-  const [selectedTest, setSelectedTest] = useState<{
-    isOpen: boolean
-    testId?: number
-  }>({ isOpen: false })
-  const [showTest, setShowTest] = useState(false)
+  // const [selectedTest, setSelectedTest] = useState<{
+  //   isOpen: boolean
+  //   testId?: number
+  // }>({ isOpen: false })
+  // const [showTest, setShowTest] = useState(false)
   
 
   useEffect(() => {
-    // Check if all stars in the current level are activated
-    console.log("activeStars", activeStars)
-    console.log("currentPoint", currentPoint)
-    console.log("if case", Object.keys(activeStars[currentPoint] || {}).length)
+
     if (Object.keys(activeStars[currentPoint] || {}).length === 3) {
       // Unlock the next level if it exists
       if (currentPoint < journeyPoints.length) {
         console.log("setting current point to", currentPoint + 1)
         setCurrentPoint((prevPoint) => prevPoint + 1)
-        // Initialize the next point's stars
         setActiveStars((prev) => ({ ...prev, [currentPoint + 1]: {} }))
       }
     }
@@ -369,41 +365,31 @@ export default function Course({
 //     setShowTest((prev) => !prev); // Force re-render
 //   };
 
-  const handleTestCompletion = (testId: number, score: number) => {
-    if (testId === undefined) {
-      console.error("handleTestCompletion called with undefined testId");
-      return;
-    }
+  // const handleTestCompletion = (testId: number, score: number) => {
+  //   if (testId === undefined) {
+  //     console.error("handleTestCompletion called with undefined testId");
+  //     return;
+  //   }
   
-    setTestScores((prev) => {
-      const newScores = { ...prev, [testId]: score };
-      console.log("Updated test scores:", newScores);
-      return newScores;
-    });
+  //   setTestScores((prev) => {
+  //     const newScores = { ...prev, [testId]: score };
+  //     console.log("Updated test scores:", newScores);
+  //     return newScores;
+  //   });
   
-    setShowTest(false);
+  //   setShowTest(false);
   
-    console.log("score", score)
-    if (score === 6) {
-      console.log("score is 6, setting current point to", testId + 1)
-      setCurrentPoint((prevPoint: number) => Math.max(prevPoint, testId + 1));
-    }
+  //   console.log("score", score)
+  //   if (score === 6) {
+  //     console.log("score is 6, setting current point to", testId + 1)
+  //     setCurrentPoint((prevPoint: number) => Math.max(prevPoint, testId + 1));
+  //   }
   
-    // setActiveStars((prev) => ({
-    //   ...prev,
-    //   [testId]: {
-    //     ...(prev[testId] || {}), // Preserve existing stars if any
-    //     1: score >= 2, // First star for 2+ correct
-    //     2: score >= 4, // Second star for 4+ correct
-    //     3: score === 6, // Third star only for full marks
-    //   },
-    // }));
-  
-    setSelectedTest({
-      isOpen: false,
-      testId: undefined, // Reset testId to avoid stale state issues
-    });
-  };
+  //   setSelectedTest({
+  //     isOpen: false,
+  //     testId: undefined, // Reset testId to avoid stale state issues
+  //   });
+  // };
   
 
 //   const getTestStars = (score: number) => {
@@ -411,10 +397,10 @@ export default function Course({
 //   };
 
   // if (showTest) {
-  if (showTest && selectedTest.testId !== undefined) {
+  // if (showTest && selectedTest.testId !== undefined) {
 
-    return <TestComponent testId={selectedTest.testId!} onComplete={handleTestCompletion} />
-  }
+  //   return <TestComponent testId={selectedTest.testId!} onComplete={handleTestCompletion} />
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-900 via-purple-900 to-purple-800 text-cyan-400 p-4 sm:p-8 flex flex-col justify-center">
@@ -592,8 +578,8 @@ export default function Course({
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <linearGradient id={`star-fill-${point.id}-${starId}`} x1="0%" x2="100%" y1="0%" y2="0%">
-                        <stop offset={`${testStarFill * 100}%`} stopColor="#FACC15" /> {/* ✅ Yellow fill for correct fraction */}
-                        <stop offset={`${testStarFill * 100}%`} stopColor="#4B5563" /> {/* ✅ Gray for unfilled part */}
+                        <stop offset={`${testStarFill * 100}%`} stopColor="#FACC15" /> 
+                        <stop offset={`${testStarFill * 100}%`} stopColor="#4B5563" /> 
                       </linearGradient>
                       {/* <path
                         d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"

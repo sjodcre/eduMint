@@ -7,6 +7,8 @@ import { User } from "@/shared/types/user";
 import { ProfileHeaderType } from "@/shared/types";
 import { getProfileByWalletAddress } from "@/api/profile-api";
 import othent from "@/shared/lib/othent";
+import { processId } from "@/shared/config/config";
+import { dryrunWithTimeout } from "@/shared/utils/aoUtils";
 // import { toast } from "@/components/ui/use-toast";
 
 export enum WalletEnum {
@@ -41,6 +43,9 @@ interface ArweaveContextState {
   setIsProfileLoading: (isLoading: boolean) => void;
   selectedUser: User | null;
   setSelectedUser: (user: User | null) => void;
+  courseProgress: { currentPoint: number; testScores: any; activeStars: any } | null; 
+  setCourseProgress: (progress: { currentPoint: number; testScores: any; activeStars: any } | null) => void; 
+  
 }
 
 interface ArweaveProviderProps {
@@ -61,6 +66,8 @@ const DEFAULT_CONTEXT: ArweaveContextState = {
   setIsProfileLoading: (_isLoading: boolean) => {},
   selectedUser: null,
   setSelectedUser(_user: User | null) {},
+  courseProgress: null,
+  setCourseProgress: (_progress) => {},
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -108,6 +115,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
   const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
   const [profile, setProfile] = React.useState<ProfileHeaderType | null>(null);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
+  const [courseProgress, setCourseProgress] = React.useState<{ currentPoint: number; testScores: any; activeStars: any } | null>(null);
 
   React.useEffect(() => {
     handleWallet();
@@ -120,6 +128,61 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
     };
     // }, [connected]);
   }, []);
+
+  React.useEffect(() => {
+    if (!profile) return;
+  
+    const fetchProgress = async () => {
+      console.log("Fetching course progress using dryrunWithTimeout...");
+      try {
+        const response = await dryrunWithTimeout(
+          processId,
+          [
+            { name: "Action", value: "Get-Course-Progress" },
+            { name: "UserWID", value: profile.walletAddress },
+          ],
+          null,
+          20000
+        );
+
+        console.log("response from fetchProgress: ", response);
+  
+        if (!response?.Messages?.length) {
+          console.error("No progress data received.");
+          return;
+        }
+
+        const messageData = response.Messages[0]?.Data;
+        
+        if (messageData === "No progress found") {
+          // Set default states for new user
+          setCourseProgress({
+            currentPoint: 1,
+            testScores: {},
+            activeStars: {},
+          });
+          console.log("New user - setting default course progress");
+          return;
+        }
+  
+        const progressData = JSON.parse(messageData || "{}");
+  
+        if (Object.keys(progressData).length > 0) {
+          setCourseProgress({
+            currentPoint: progressData.CurrentPoint,
+            testScores: JSON.parse(progressData.TestScores || "{}"),
+            activeStars: JSON.parse(progressData.ActiveStars || "{}"),
+          });
+          console.log("Loaded course progress:", progressData);
+        }
+      } catch (error) {
+        console.error("Error fetching course progress:", error);
+      }
+    };
+  
+    fetchProgress();
+  }, [profile]);
+  
 
   React.useEffect(() => {
     (async function () {
@@ -312,6 +375,8 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
           setIsProfileLoading,
           selectedUser,
           setSelectedUser,
+          courseProgress,
+          setCourseProgress,
         }}
       >
         {props.children}
