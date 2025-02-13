@@ -167,12 +167,23 @@ export function useFFmpeg() {
   
       // Process each section
       for (const { start, end, fileName } of sections) {
+        // await ffmpeg.exec([
+        //   '-i', inputFileName,
+        //   '-ss', start.toString(),
+        //   // '-to', end.toString(),
+        //   '-t', (end - start).toString(),  // Duration instead of `-to`
+        //   ...(isMuted ? ['-an'] : ['-c:a', 'copy']),
+        //   '-c:v', 'copy',
+        //   fileName,
+        // ]);
         await ffmpeg.exec([
           '-i', inputFileName,
           '-ss', start.toString(),
           '-to', end.toString(),
+          '-c:v', 'libx264',  // Encode video to avoid keyframe issues
           ...(isMuted ? ['-an'] : ['-c:a', 'copy']),
-          '-c:v', 'copy',
+          // '-c:a', 'copy',     // Keep original audio
+          '-preset', 'ultrafast',  // Speed up processing
           fileName,
         ]);
       }

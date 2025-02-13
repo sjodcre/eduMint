@@ -412,13 +412,13 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
   };
 
   const convertToHHMMSS = (value: string) => {
-    const secNum = parseInt(value, 10);
+    const secNum = parseFloat(value);
     let hours = Math.floor(secNum / 3600);
     let minutes = Math.floor((secNum - hours * 3600) / 60);
     let seconds = secNum - hours * 3600 - minutes * 60;
     let hoursString = hours.toString();
     let minutesString = minutes.toString();
-    let secondsString = seconds.toString();
+    let secondsString = seconds.toFixed(1);
     if (hours < 10) {
       hoursString = `0${hours}`;
     }
@@ -426,7 +426,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       minutesString = `0${minutes}`;
     }
     if (seconds < 10) {
-      secondsString = `0${seconds}`;
+      secondsString = `0${seconds.toFixed(1)}`;
     }
     let time;
     if (hoursString === "00") {
@@ -464,7 +464,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       console.log("readValue", readValue);
       console.log("endTime", endTime);
       if (endTime !== readValue) {
-        console.log("setting endTime", readValue);
+        // console.log("setting endTime", readValue);
         setEndTime(readValue);
       }
     } else {
@@ -480,7 +480,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
         }
       }
     }
-    console.log("readValue", readValue);
+    // console.log("readValue", readValue);
 
   };
 
@@ -537,6 +537,8 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
       console.error('No video file selected.');
       return;
     }
+
+    console.log("sections", sections);
 
     try {
       const { file, url } = await trimVideo(videoFile, sections, isMuted);
@@ -604,6 +606,8 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
   };
 
   const handleAddSection = () => {
+    console.log("startTime", startTime);
+    console.log("endTime", endTime);
     setSections([
       ...sections,
       { start: startTime, end: endTime, fileName: `section${sections.length + 1}.mp4` }]);
@@ -695,7 +699,7 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
               behaviour="drag"
               range={{ min: 0, max: videoDuration || 2 }}
               start={[0, videoDuration || 2]}
-              step={1}
+              step={0.1}
               connect
               onUpdate={(values, handle) => updateOnSliderChange(values.map(Number), handle)}
               className="w-full"
@@ -765,9 +769,9 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
               </div>
             )}
 
-            {videoDuration > 30 ? (
+            {videoDuration > 35 ? (
               <div className="text-red-500 mb-4">
-                Video is too long. Please trim first - maximum duration is 30 seconds.
+                Video is too long. Please trim first - maximum duration is 35 seconds.
               </div>
             ) : (
               <div className="space-y-4">

@@ -506,7 +506,7 @@ function VideoCard({
     <div className="relative h-full w-full bg-black snap-start flex items-center justify-center">
       <video
         ref={videoRef}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover sm:object-scale-down"
         loop
         muted={isMuted}
         playsInline
@@ -516,7 +516,7 @@ function VideoCard({
       </video>
       <div className="absolute bottom-16 left-4 right-4">
         <h2 className="text-white text-lg font-bold mb-1">{video.title}</h2>
-        <p className="text-white text-sm mb-2">{video.description.split(' ').slice(0, 20).join(' ') + (video.description.split(' ').length > 20 ? '...' : '')}</p>
+        <p className="text-white text-sm mb-2">{video.description.split(' ').slice(0, 10).join(' ') + (video.description.split(' ').length > 10 ? '...' : '')}</p>
       </div>
 
       <div className="absolute bottom-4 left-4 flex items-center">
