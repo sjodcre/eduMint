@@ -9,6 +9,7 @@ import { ScreenProvider } from "./context/ScreenContext";
 // import ArweaveWebWalletStrategy from "@arweave-wallet-kit/webwallet-strategy";
 import { ArweaveProvider } from "./context/ArweaveProvider";
 import { BrowserRouter } from "react-router-dom";
+import { VideoProvider } from "./context/VideoContext";
 
 registerSW();
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -31,7 +32,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           }}
         > */}
           <ArweaveProvider>
-            <App />
+            <VideoProvider>
+              <App />
+            </VideoProvider>
           </ArweaveProvider>
         {/* </ArweaveWalletKit> */}
       </ScreenProvider>

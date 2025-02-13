@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Video } from "@/shared/types/user";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { processId } from "@/shared/config/config";
@@ -81,27 +81,20 @@ export function useVideos() {
 
         if (profile!==null && profile?.version !== null) {
           console.log("fetching videos with profile");
-          const msgRes = await sendMessageWithTimeout(
-            processId,
+
+          const msgRes = await dryrunWithTimeout(
+            processId, 
             [
               { name: "Action", value: "List-Posts-Likes" },
               { name: "Author-Id", value: profile.walletAddress },
               { name: "Page", value: pageNum.toString() },
               { name: "Limit", value: limit.toString() },
             ],
-            wallet,
-            "",
+            null, 
             30000
           );
 
-          const postResult = await fetchResultWithTimeout(
-            processId,
-            msgRes,
-            25000
-          );
-          console.log("postResult at use-videos: ", postResult);
-
-          const parsedPosts = postResult.Messages.map((msg: any) => {
+          const parsedPosts = msgRes.Messages.map((msg: any) => {
             const parsedData = JSON.parse(msg.Data);
             return parsedData.map((post: any) => ({
               ...post,
@@ -111,6 +104,38 @@ export function useVideos() {
               Bookmarked: post.Bookmarked === 1,
             }));
           });
+          // const msgRes = await sendMessageWithTimeout(
+          //   processId,
+          //   [
+          //     { name: "Action", value: "List-Posts-Likes" },
+          //     { name: "Author-Id", value: profile.walletAddress },
+          //     { name: "Page", value: pageNum.toString() },
+          //     { name: "Limit", value: limit.toString() },
+          //   ],
+          //   wallet,
+          //   "",
+          //   30000
+          // );
+
+          console.log("msgRes at use-videos: ", msgRes);
+
+          // const postResult = await fetchResultWithTimeout(
+          //   processId,
+          //   msgRes,
+          //   25000
+          // );
+          // console.log("postResult at use-videos: ", postResult);
+
+          // const parsedPosts = postResult.Messages.map((msg: any) => {
+          //   const parsedData = JSON.parse(msg.Data);
+          //   return parsedData.map((post: any) => ({
+          //     ...post,
+          //     Liked: post.Liked === 1,
+          //     LikeCount: post.LikeCount || 0,
+          //     SellingStatus: post.SellingStatus === 1,
+          //     Bookmarked: post.Bookmarked === 1,
+          //   }));
+          // });
 
           const videos = mapPostsToVideos(parsedPosts);
           setVideos(videos);
@@ -193,20 +218,22 @@ export function useVideos() {
     }
   };
 
-  useEffect(() => {
-    if (window.arweaveWallet) {
-      fetchVideos(1);
-      console.log("useVideos useEffect fetch videos ");
-    }
-// }, [connected]);
-  }, [walletAddress, profile]);
+//   useEffect(() => {
+//     console.log("useVideos useEffect walletAddress: ", walletAddress);
+//     console.log("useVideos useEffect profile: ", profile);
+//     if (window.arweaveWallet) {
+//       fetchVideos(1);
+//       console.log("useVideos useEffect fetch videos ");
+//     }
+// // }, [connected]);
+//   }, [walletAddress, profile]);
 
   return {
     videos,
     loading,
     error,
-    // refetch: () => fetchVideos(1),
-    refetch: (page = 1) => fetchVideos(page), // ✅ Allow page as an argument
+    // refetch: (page = 1) => fetchVideos(page), 
+    fetchVideos
 
   };
 }

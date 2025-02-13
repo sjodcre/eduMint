@@ -8,18 +8,19 @@ import { processId } from "@/shared/config/config";
 import { transferAR } from "@/shared/lib/tip";
 import { toast } from "./ui/use-toast";
 import { fetchResultWithTimeout, sendMessageWithTimeout } from "@/shared/utils/aoUtils";
+import { useVideoSettings } from "@/context/VideoContext";
 // import { useConnection } from "@arweave-wallet-kit/react";
 
 export default function VideoFeed() {
-  const { videos, loading, refetch: fetchVideos, error } = useVideos();
+  const { videos, loading, fetchVideos, error } = useVideos();
   const [localVideos, setLocalVideos] = useState(videos);
   const [page, setPage] = useState(1);
   const [hasMoreVideos, setHasMoreVideos] = useState(true); // ✅ Track if more videos exist
   // const {videos, loading, error, fetchPlayerProfile} = useStore()
-  const { setSelectedUser, walletAddress, wallet, isProfileLoading } = useArweaveProvider()
+  const { setSelectedUser, walletAddress, wallet, isProfileLoading, profile } = useArweaveProvider()
   const { setCurrentScreen } = useContext(ScreenContext)
-  const [isFetching, setIsFetching] = useState(false);
-  const eventBound = useRef(false);
+  // const [isFetching, setIsFetching] = useState(false);
+  // const eventBound = useRef(false);
   // const { connected, connect } = useConnection();
 
   const checkWalletConnection = async () => {
@@ -46,104 +47,81 @@ export default function VideoFeed() {
     return true;
   };
 
-  // useEffect(() => {
-  //   console.log("setting local videos at useEffect");
-  //   console.log("videos", videos);
-  //   setLocalVideos(videos);
-  // }, [videos]);
+
+    useEffect(() => {
+    if (window.arweaveWallet) {
+      fetchVideos(1);
+    }
+// }, [connected]);
+  }, [profile]);
+
+  useEffect(() => {
+    console.log("local videos", localVideos);
+    if (localVideos.length === 0) {
+      setLocalVideos(videos);
+    }
+  }, [videos]);
 
   // useEffect(() => {
   //   const handleScreenChange = async () => {
-  //     if (window.location.hash === '#videofeed') {
-  //       console.log("Home button pressed - refreshing videos");
-  //       const updatedVideos = await fetchVideos();
-  //       // setLocalVideos(updatedVideos);
-  //       setLocalVideos(updatedVideos || []);
+  //     // Check if the hash matches '#videofeed'
+  //     if (isFetching) return;
+  //     setIsFetching(true);
+
+  //     try {
+  //       if (window.location.hash === '#videofeed') {
+  //         // console.log("Home button pressed - refreshing videos");
+  //         const updatedVideos = await fetchVideos(1);
+  //         // setLocalVideos(updatedVideos || []);
+  //         setLocalVideos((prevVideos) => updatedVideos || prevVideos);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error refreshing videos:", error);
+  //     } finally {
+  //       setIsFetching(false);
   //     }
   //   };
 
-  //   const handleVisibilityChange = () => {
-  //     if (!document.hidden) {
-  //       handleScreenChange();
-  //     }
+  //   // const handleVisibilityChange = () => {
+  //   //   console.log("visibility change", document.hidden);
+
+  //   //   // Debounce the visibility change event to prevent rapid multiple calls
+  //   //   clearTimeout(visibilityTimeout);
+  //   //   if (!document.hidden) {
+  //   //     visibilityTimeout = setTimeout(() => {
+  //   //       handleScreenChange();
+  //   //     }, 1000); // 1 second debounce to avoid excessive calls
+  //   //   }
+  //   // };
+  //   const handleAppResume = () => {
+  //     console.log("App resumed or tab focused, re-fetching videos...");
+  //     handleScreenChange();
   //   };
 
-  //   // Add event listener for hash changes
-  //   window.addEventListener('hashchange', handleScreenChange);
-  //   document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   if (eventBound.current) return;
+  //   eventBound.current = true;
 
+  //   // Add event listeners for hashchange and visibilitychange
+  //   // window.addEventListener('hashchange', handleScreenChange);
+  //   // document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   // window.addEventListener("pageshow", handleAppResume);
+  //   // window.addEventListener("focus", handleAppResume);
+  //   // window.addEventListener("hashchange", handleAppResume);
 
   //   // Initial check
   //   handleScreenChange();
 
   //   // Cleanup
   //   return () => {
-  //     window.removeEventListener('hashchange', handleScreenChange);
-  //     document.removeEventListener('visibilitychange', handleVisibilityChange);
+  //     // window.removeEventListener('hashchange', handleScreenChange);
+  //     // document.removeEventListener('visibilitychange', handleVisibilityChange);
+  //     // window.removeEventListener("pageshow", handleAppResume);
+  //     // window.removeEventListener("focus", handleAppResume);
+  //     // window.removeEventListener("hashchange", handleAppResume)
+  //     eventBound.current = false;
 
   //   };
   // }, []);
-
-  useEffect(() => {
-    const handleScreenChange = async () => {
-      // Check if the hash matches '#videofeed'
-      if (isFetching) return;
-      setIsFetching(true);
-
-      try {
-        if (window.location.hash === '#videofeed') {
-          console.log("Home button pressed - refreshing videos");
-          const updatedVideos = await fetchVideos();
-          // setLocalVideos(updatedVideos || []);
-          setLocalVideos((prevVideos) => updatedVideos || prevVideos);
-        }
-      } catch (error) {
-        console.error("Error refreshing videos:", error);
-      } finally {
-        setIsFetching(false);
-      }
-    };
-
-    // const handleVisibilityChange = () => {
-    //   console.log("visibility change", document.hidden);
-
-    //   // Debounce the visibility change event to prevent rapid multiple calls
-    //   clearTimeout(visibilityTimeout);
-    //   if (!document.hidden) {
-    //     visibilityTimeout = setTimeout(() => {
-    //       handleScreenChange();
-    //     }, 1000); // 1 second debounce to avoid excessive calls
-    //   }
-    // };
-    const handleAppResume = () => {
-      console.log("App resumed or tab focused, re-fetching videos...");
-      handleScreenChange();
-    };
-
-    if (eventBound.current) return;
-    eventBound.current = true;
-
-    // Add event listeners for hashchange and visibilitychange
-    // window.addEventListener('hashchange', handleScreenChange);
-    // document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener("pageshow", handleAppResume);
-    window.addEventListener("focus", handleAppResume);
-    window.addEventListener("hashchange", handleAppResume);
-
-    // Initial check
-    handleScreenChange();
-
-    // Cleanup
-    return () => {
-      // window.removeEventListener('hashchange', handleScreenChange);
-      // document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener("pageshow", handleAppResume);
-      window.removeEventListener("focus", handleAppResume);
-      window.removeEventListener("hashchange", handleAppResume)
-      eventBound.current = false;
-
-    };
-  }, []);
 
   // const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
   //   const bottom =
@@ -417,16 +395,23 @@ function VideoCard({
   const [isLiked, setIsLiked] = useState(video.liked);
   const arProvider = useArweaveProvider();
   // const { connected, connect } = useConnection();
+  const { isMuted, toggleMute } = useVideoSettings(); // ✅ Get global mute state
 
-  const [isMuted, setIsMuted] = useState(true);
+  // const [isMuted, setIsMuted] = useState(true);
 
-  const toggleMute = () => {
+  // const toggleMute = () => {
+  //   if (videoRef.current) {
+  //     const muted = !isMuted;
+  //     setIsMuted(muted);
+  //     videoRef.current.muted = muted;
+  //   }
+  // };
+
+  useEffect(() => {
     if (videoRef.current) {
-      const muted = !isMuted;
-      setIsMuted(muted);
-      videoRef.current.muted = muted;
+      videoRef.current.muted = isMuted; // ✅ Sync mute state with global setting
     }
-  };
+  }, [isMuted]);
 
   useEffect(() => {
     const options = {
@@ -508,7 +493,7 @@ function VideoCard({
         ref={videoRef}
         className="h-full w-full object-cover sm:object-scale-down"
         loop
-        muted={isMuted}
+        // muted={isMuted}
         playsInline
       >
         <source src={video.videoUrl} type="video/mp4" />
