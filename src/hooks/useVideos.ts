@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Video } from "@/shared/types/user";
 import { useArweaveProvider } from "@/context/ArweaveProvider";
 import { processId } from "@/shared/config/config";
-import { dryrunWithTimeout, fetchResultWithTimeout, sendMessageWithTimeout } from "@/shared/utils/aoUtils";
+import { dryrunWithTimeout} from "@/shared/utils/aoUtils";
 // import { useConnection } from "@arweave-wallet-kit/react";
 
 const MAX_RETRIES = 3;
@@ -13,7 +13,7 @@ export function useVideos() {
   const [loading, setLoading] = useState(false);
   // const { connected } = useConnection();
   const [error, setError] = useState<string | null>(null);
-  const {walletAddress, wallet, profile} = useArweaveProvider()
+  const {walletAddress, profile} = useArweaveProvider()
 
   const wait = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
