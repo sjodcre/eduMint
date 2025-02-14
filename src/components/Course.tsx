@@ -25,19 +25,19 @@ interface JourneyPoint {
 const journeyPoints: JourneyPoint[] = [
   {
     id: 1,
-    label: "Initiate",
+    label: "Permanent Storage",
     x: 10,
     y: 15,
     direction: "right",
     videoUrls: [
-      "https://pixabay.com/videos/download/video-32976_tiny.mp4", // Star 1
-      "https://pixabay.com/videos/download/video-31377_tiny.mp4", // Star 2
-      "https://pixabay.com/videos/download/video-5608_tiny.mp4", // Star 3
+      "https://arweave.net/N4qu0UoH_CUqNbGuGsiE1Nk-ZnL-MO8oWK3vERloQQw", // Star 1
+      "https://arweave.net/QYB6dK8lrABM_7S3VzrgILILkkxzUxwb_7QBKhzKEcI", // Star 2
+      "https://arweave.net/Ur-jntkl_mQPkVvHJ-27ENR0z3DlXh7tG3bGbpBb17s", // Star 3
     ],
   },
   {
     id: 2,
-    label: "Data Upload",
+    label: "Why Arweave",
     x: 90,
     y: 30,
     direction: "left",
@@ -49,7 +49,7 @@ const journeyPoints: JourneyPoint[] = [
   },
   {
     id: 3,
-    label: "Neural Link",
+    label: "Decentralized Computing",
     x: 10,
     y: 45,
     direction: "right",
@@ -62,7 +62,7 @@ const journeyPoints: JourneyPoint[] = [
   { id: 4, label: "Mid-Test", x: 90, y: 60, direction: "left", isTest: true }, // No videos
   {
     id: 5,
-    label: "AI Fusion",
+    label: "AO Capabilities",
     x: 10,
     y: 75,
     direction: "right",

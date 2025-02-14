@@ -769,9 +769,9 @@ const VideoEditing: React.FC<UploadVideosProps> = ({ onUpload }) => {
               </div>
             )}
 
-            {videoDuration > 35 ? (
+            {videoDuration > 99 ? (
               <div className="text-red-500 mb-4">
-                Video is too long. Please trim first - maximum duration is 35 seconds.
+                Video is too long. Please trim first - maximum duration is 45 seconds.
               </div>
             ) : (
               <div className="space-y-4">
